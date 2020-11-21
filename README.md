@@ -1,7 +1,7 @@
 # ShortString
 An **std::array** based string template. 
 Can fit into a pointer's size. 
-**Never alloctates memory**. 
+**Never allocates memory**. 
 Cuts longer strings.
 
-C++17 needed.
+C++17 is needed.
