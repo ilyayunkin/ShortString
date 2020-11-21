@@ -33,10 +33,16 @@ struct BasicShortString
     constexpr auto begin(){return buf.begin();}
     constexpr auto end(){return buf.begin() + size();}
 
-    constexpr auto cbegin()const{return buf.begin();}
-    constexpr auto cend()const{return buf.begin() + size();}
-    constexpr auto cbegin(){return buf.begin();}
-    constexpr auto cend(){return buf.begin() + size();}
+    constexpr auto cbegin()const{return buf.cbegin();}
+    constexpr auto cend()const{return buf.cbegin() + size();}
+
+    constexpr auto rbegin()const{return buf.rend() - size();}
+    constexpr auto rend()const{return buf.rend();}
+    constexpr auto rbegin(){return buf.rend() - size();}
+    constexpr auto rend(){return buf.rend();}
+
+    constexpr auto crbegin()const{return buf.crend() - size();}
+    constexpr auto crend()const{return buf.crend();}
 
     constexpr operator char*(){return buf.data();}
     constexpr operator const char*()const{return buf.data();}

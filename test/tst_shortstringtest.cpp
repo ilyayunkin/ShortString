@@ -22,7 +22,8 @@ private slots:
     void emptyAssignedStringIsEmpty();
     void comparableWithRawStrings();
     void castableToStdString();
-    void stdCopyable();
+    void stdCopyableDirect();
+    void stdCopyableReverse();
 };
 
 ShortStringTest::ShortStringTest()
@@ -108,34 +109,60 @@ void ShortStringTest::castableToStdString()
     QCOMPARE(stdS, c);
 }
 
-void ShortStringTest::stdCopyable()
+void ShortStringTest::stdCopyableDirect()
 {
+    constexpr auto c = "1234567";
     {
-        constexpr auto c = "1234567";
         const ShortString s{"1234567"};
         QString qstr;
         std::copy(s.begin(), s.end(), std::back_inserter(qstr));
         QCOMPARE(qstr, QString(c));
     }
     {
-        constexpr auto c = "1234567";
         ShortString s{"1234567"};
         QString qstr;
         std::copy(s.begin(), s.end(), std::back_inserter(qstr));
         QCOMPARE(qstr, QString(c));
     }
     {
-        constexpr auto c = "1234567";
         const ShortString s{"1234567"};
         QString qstr;
         std::copy(s.cbegin(), s.cend(), std::back_inserter(qstr));
         QCOMPARE(qstr, QString(c));
     }
     {
-        constexpr auto c = "1234567";
         ShortString s{"1234567"};
         QString qstr;
         std::copy(s.cbegin(), s.cend(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
+}
+
+void ShortStringTest::stdCopyableReverse()
+{
+    constexpr auto c = "7654321";
+    {
+        const ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.rbegin(), s.rend(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
+    {
+        ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.rbegin(), s.rend(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
+    {
+        const ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.crbegin(), s.crend(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
+    {
+        ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.crbegin(), s.crend(), std::back_inserter(qstr));
         QCOMPARE(qstr, QString(c));
     }
 }
