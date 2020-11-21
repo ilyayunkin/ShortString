@@ -1,5 +1,6 @@
 #include <QtTest>
 #include "ShortString.h"
+#include <algorithm>
 // add necessary includes here
 
 class ShortStringTest : public QObject
@@ -21,6 +22,7 @@ private slots:
     void emptyAssignedStringIsEmpty();
     void comparableWithRawStrings();
     void castableToStdString();
+    void stdCopyable();
 };
 
 ShortStringTest::ShortStringTest()
@@ -104,6 +106,38 @@ void ShortStringTest::castableToStdString()
     ShortString s{"1234567"};
     std::string stdS(s);
     QCOMPARE(stdS, c);
+}
+
+void ShortStringTest::stdCopyable()
+{
+    {
+        constexpr auto c = "1234567";
+        const ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.begin(), s.end(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
+    {
+        constexpr auto c = "1234567";
+        ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.begin(), s.end(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
+    {
+        constexpr auto c = "1234567";
+        const ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.cbegin(), s.cend(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
+    {
+        constexpr auto c = "1234567";
+        ShortString s{"1234567"};
+        QString qstr;
+        std::copy(s.cbegin(), s.cend(), std::back_inserter(qstr));
+        QCOMPARE(qstr, QString(c));
+    }
 }
 
 

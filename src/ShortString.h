@@ -24,22 +24,23 @@ struct BasicShortString
     };
 
     constexpr auto capacity()const{return len - 1;}
-    constexpr auto size()const{return std::strlen(buf);}
-    constexpr auto length()const{return std::strlen(buf);}
+    constexpr auto size()const{return std::strlen(buf.data());}
+    constexpr auto length()const{return std::strlen(buf.data());}
     constexpr auto empty()const{return buf[0] == '\0';}
 
     constexpr auto begin()const{return buf.begin();}
-    constexpr auto end()const{return buf.begin();}
+    constexpr auto end()const{return buf.begin() + size();}
     constexpr auto begin(){return buf.begin();}
-    constexpr auto end(){return buf.begin();}
+    constexpr auto end(){return buf.begin() + size();}
 
     constexpr auto cbegin()const{return buf.begin();}
-    constexpr auto cend()const{return buf.begin();}
+    constexpr auto cend()const{return buf.begin() + size();}
     constexpr auto cbegin(){return buf.begin();}
-    constexpr auto cend(){return buf.begin();}
+    constexpr auto cend(){return buf.begin() + size();}
 
     constexpr operator char*(){return buf.data();}
     constexpr operator const char*()const{return buf.data();}
+
     void operator=(const char *const s){
         auto outp = s;
         auto inp = buf.begin();
