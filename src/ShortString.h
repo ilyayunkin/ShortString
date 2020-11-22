@@ -49,6 +49,15 @@ struct BasicShortString
     constexpr operator char*(){return buf.data();}
     constexpr operator const char*()const{return buf.data();}
 
+    //Returns a reference to the first element in the container.
+    //Calling front on an empty container is undefined behaviour.
+    constexpr auto front()const{return *begin();}
+    constexpr auto front(){return *begin();}
+    //Returns a reference to the last element in the container.
+    //Calling back on an empty container causes undefined behavior.
+    constexpr auto back()const{return *std::prev(end());}
+    constexpr auto back(){return *std::prev(end());}
+
     void operator=(const char *const s){
         auto outp = s;
         auto inp = buf.begin();

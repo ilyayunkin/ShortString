@@ -24,6 +24,8 @@ private slots:
     void appendsWithPushBack();
     void comparableWithRawStrings();
     void castableToStdString();
+    void frontReturnsFirstChar();
+    void backReturnsLastChar();
     void stdCopyableDirect();
     void stdCopyableReverse();
 };
@@ -125,6 +127,53 @@ void ShortStringTest::castableToStdString()
     ShortString s{"1234567"};
     std::string stdS(s);
     QCOMPARE(stdS, c);
+}
+
+void ShortStringTest::frontReturnsFirstChar()
+{
+    constexpr auto c = '1';
+    {
+        ShortString s{"1234567"};
+        QCOMPARE(s.front(), c);
+    }
+    {
+        const ShortString s{"1234567"};
+        QCOMPARE(s.front(), c);
+    }
+    {
+        ShortString s{"1234"};
+        QCOMPARE(s.front(), c);
+    }
+    {
+        const ShortString s{"1234"};
+        QCOMPARE(s.front(), c);
+    }
+}
+
+void ShortStringTest::backReturnsLastChar()
+{
+    {
+        constexpr auto c = '7';
+        {
+            ShortString s{"1234567"};
+            QCOMPARE(s.back(), c);
+        }
+        {
+            const ShortString s{"1234567"};
+            QCOMPARE(s.back(), c);
+        }
+    }
+    {
+        constexpr auto c = '4';
+        {
+            ShortString s{"1234"};
+            QCOMPARE(s.back(), c);
+        }
+        {
+            const ShortString s{"1234"};
+            QCOMPARE(s.back(), c);
+        }
+    }
 }
 
 void ShortStringTest::stdCopyableDirect()
