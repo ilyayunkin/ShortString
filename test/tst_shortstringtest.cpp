@@ -367,19 +367,13 @@ void compareBench(){
     }
 }
 void ShortStringTest::compareBenchmark(){
-    QBENCHMARK{
-        compareBench<ShortString>();
-    }
+    QBENCHMARK{ compareBench<ShortString>(); }
 }
 void ShortStringTest::compareBenchmarkString(){
-    QBENCHMARK{
-        compareBench<std::string>();
-    }
+    QBENCHMARK{ compareBench<std::string>(); }
 }
 void ShortStringTest::compareBenchmarkQString(){
-    QBENCHMARK{
-        compareBench<QString>();
-    }
+    QBENCHMARK{ compareBench<QString>(); }
 }
 template <typename C>
 void initBench(){
@@ -390,14 +384,10 @@ void initBench(){
     }
 }
 void ShortStringTest::initBenchmark(){
-    QBENCHMARK{
-        initBench<ShortString>();
-    }
+    QBENCHMARK{ initBench<ShortString>(); }
 }
 void ShortStringTest::initBenchmarkString(){
-    QBENCHMARK{
-        initBench<std::string>();
-    }
+    QBENCHMARK{ initBench<std::string>(); }
 }
 void ShortStringTest::initBenchmarkQString(){
     QBENCHMARK{
@@ -415,20 +405,13 @@ void pushBench(){
     }
 }
 void ShortStringTest::pushBenchmark(){
-    QBENCHMARK{
-        pushBench<ShortString>();
-    }
+    QBENCHMARK{ pushBench<ShortString>(); }
 }
 void ShortStringTest::pushBenchmarkString(){
-    QBENCHMARK{
-        pushBench<std::string>();
-    }
+    QBENCHMARK{ pushBench<std::string>(); }
 }
-
 void ShortStringTest::pushBenchmarkQString(){
-    QBENCHMARK{
-        pushBench<QString>();
-    }
+    QBENCHMARK{ pushBench<QString>(); }
 }
 template <typename C>
 void appendBench(){
@@ -440,19 +423,13 @@ void appendBench(){
     }
 }
 void ShortStringTest::appendBenchmark(){
-    QBENCHMARK{
-        appendBench<ShortString>();
-    }
+    QBENCHMARK{ appendBench<ShortString>(); }
 }
 void ShortStringTest::appendBenchmarkString(){
-    QBENCHMARK{
-        appendBench<std::string>();
-    }
+    QBENCHMARK{ appendBench<std::string>(); }
 }
 void ShortStringTest::appendBenchmarkQString(){
-    QBENCHMARK{
-        appendBench<QString>();
-    }
+    QBENCHMARK{ appendBench<QString>(); }
 }
 template <typename C>
 void sortBench(){
@@ -464,19 +441,13 @@ void sortBench(){
     std::sort(std::begin(v), std::end(v));
 }
 void ShortStringTest::sortBenchmark(){
-    QBENCHMARK{
-        sortBench<ShortString>();
-    }
+    QBENCHMARK{ sortBench<ShortString>(); }
 }
 void ShortStringTest::sortBenchmarkString(){
-    QBENCHMARK{
-        sortBench<std::string>();
-    }
+    QBENCHMARK{ sortBench<std::string>(); }
 }
 void ShortStringTest::sortBenchmarkQString(){
-    QBENCHMARK{
-        sortBench<QString>();
-    }
+    QBENCHMARK{ sortBench<QString>(); }
 }
 
 QTEST_APPLESS_MAIN(ShortStringTest)
