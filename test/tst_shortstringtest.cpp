@@ -18,6 +18,7 @@ private slots:
     void initializedStringIsNotEmpty();
     void ctorFits7Bytes();
     void assignCuts8Byte();
+    void sizeAndLengthReturnTheSame();
     void assignedStringIsNotEmpty();
     void emptyAssignedStringIsEmpty();
     void appendsWithPlusEqual();
@@ -80,6 +81,25 @@ void ShortStringTest::assignCuts8Byte()
     QCOMPARE(QString(s), QString(c));
 }
 
+void ShortStringTest::sizeAndLengthReturnTheSame()
+{
+    {
+        ShortString s{"1234567"};
+        QCOMPARE(s.size(), 7u);
+        QCOMPARE(s.size(), s.length());
+    }
+    {
+        ShortString s{"123"};
+        QCOMPARE(s.size(), 3u);
+        QCOMPARE(s.size(), s.length());
+    }
+    {
+        ShortString s;
+        QCOMPARE(s.size(), 0u);
+        QCOMPARE(s.size(), s.length());
+    }
+}
+
 void ShortStringTest::assignedStringIsNotEmpty()
 {
     ShortString s;
@@ -101,17 +121,31 @@ void ShortStringTest::emptyAssignedStringIsEmpty()
 void ShortStringTest::appendsWithPlusEqual()
 {
     constexpr auto c = "1234567";
-    ShortString s{"1"};
-    s += "2345678";
-    QCOMPARE(QString(s), QString(c));
+    {
+        ShortString s;
+        s+= "12345678";
+        QCOMPARE(QString(s), QString(c));
+    }
+    {
+        ShortString s{"1"};
+        s += "2345678";
+        QCOMPARE(QString(s), QString(c));
+    }
 }
 
 void ShortStringTest::appendsWithPushBack()
 {
     constexpr auto c = "1234567";
-    ShortString s{"1"};
-    s.push_back("2345678");
-    QCOMPARE(QString(s), QString(c));
+    {
+        ShortString s;
+        s.push_back("12345678");
+        QCOMPARE(QString(s), QString(c));
+    }
+    {
+        ShortString s{"1"};
+        s.push_back("2345678");
+        QCOMPARE(QString(s), QString(c));
+    }
 }
 
 void ShortStringTest::comparableWithRawStrings()

@@ -29,7 +29,7 @@ struct BasicShortString
 
     constexpr auto capacity()const{return len - 1;}
     constexpr auto size()const{return std::strlen(buf.data());}
-    constexpr auto length()const{return std::strlen(buf.data());}
+    constexpr auto length()const{return size();}
     constexpr auto empty()const{return buf[0] == '\0';}
 
     constexpr auto begin()const{return buf.begin();}
