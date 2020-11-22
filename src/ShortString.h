@@ -7,6 +7,8 @@
 #include <cstring>
 #include <assert.h>
 
+// len is the result of sizeof().
+// Maximal string lingth is len - 1
 template <int len>
 struct BasicShortString
 {
