@@ -5,6 +5,7 @@
 */
 #include <array>
 #include <cstring>
+#include <assert.h>
 
 template <int len>
 struct BasicShortString
@@ -14,11 +15,12 @@ struct BasicShortString
     constexpr BasicShortString(const char *const s){
         auto outp = s;
         auto inp = buf.begin();
-        while(*outp != 0 && (outp - s)
+        while(*outp != 0 && (inp - buf.begin())
               < static_cast<int>(buf.size() - 1)){
             *inp = *outp;
             ++inp;
             ++outp;
+            assert(inp < buf.end());
         }
         *inp = '\0';
     };
@@ -50,14 +52,28 @@ struct BasicShortString
     void operator=(const char *const s){
         auto outp = s;
         auto inp = buf.begin();
-        while(*outp != 0 && (outp - s)
+        while(*outp != 0 && (inp - buf.begin())
               < static_cast<int>(buf.size() - 1)){
             *inp = *outp;
             ++inp;
             ++outp;
         }
         *inp = '\0';
+        assert(inp < buf.end());
     };
+    void operator+=(const char *const s){
+        auto outp = s;
+        auto inp = end();
+        while(*outp != 0 && (inp - buf.begin())
+              < static_cast<int>(buf.size() - 1)){
+            *inp = *outp;
+            ++inp;
+            ++outp;
+        }
+        *inp = '\0';
+        assert(inp < buf.end());
+    };
+    void push_back(const char *const s){operator+=(s);}
 };
 template <int len>
 constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr)

@@ -20,6 +20,8 @@ private slots:
     void assignCuts8Byte();
     void assignedStringIsNotEmpty();
     void emptyAssignedStringIsEmpty();
+    void appendsWithPlusEqual();
+    void appendsWithPushBack();
     void comparableWithRawStrings();
     void castableToStdString();
     void stdCopyableDirect();
@@ -92,6 +94,22 @@ void ShortStringTest::emptyAssignedStringIsEmpty()
     QVERIFY(!s.empty());
     s = "";
     QVERIFY(s.empty());
+}
+
+void ShortStringTest::appendsWithPlusEqual()
+{
+    constexpr auto c = "1234567";
+    ShortString s{"1"};
+    s += "2345678";
+    QCOMPARE(QString(s), QString(c));
+}
+
+void ShortStringTest::appendsWithPushBack()
+{
+    constexpr auto c = "1234567";
+    ShortString s{"1"};
+    s.push_back("2345678");
+    QCOMPARE(QString(s), QString(c));
 }
 
 void ShortStringTest::comparableWithRawStrings()
