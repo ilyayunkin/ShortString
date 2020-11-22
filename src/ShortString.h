@@ -84,7 +84,22 @@ struct BasicShortString
         *inp = '\0';
         assert(inp < buf.end());
     };
+    void operator+=(const char c){
+        auto inp = end();
+        if(inp - begin() < capacity()){
+            *inp = c;
+            ++inp;
+        }
+        *inp = '\0';
+        assert(inp < buf.end());
+    };
     void push_back(const char *const s){operator+=(s);}
+    void append(const char *const s){operator+=(s);}
+    void push_back(const char c){operator+=(c);}
+    constexpr bool operator ==(const BasicShortString &sr)
+    {
+        return !std::strcmp(buf.data(),  sr.buf.data());
+    }
 };
 template <int len>
 constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr)

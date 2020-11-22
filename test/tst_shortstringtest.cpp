@@ -23,12 +23,25 @@ private slots:
     void emptyAssignedStringIsEmpty();
     void appendsWithPlusEqual();
     void appendsWithPushBack();
+    void pushBackCutsExcessiveData();
     void comparableWithRawStrings();
     void castableToStdString();
     void frontReturnsFirstChar();
     void backReturnsLastChar();
     void stdCopyableDirect();
     void stdCopyableReverse();
+    void compareBenchmark();
+    void compareBenchmarkString();
+    void compareBenchmarkQString();
+    void initBenchmark();
+    void initBenchmarkString();
+    void initBenchmarkQString();
+    void pushBenchmark();
+    void pushBenchmarkString();
+    void pushBenchmarkQString();
+    void appendBenchmark();
+    void appendBenchmarkString();
+    void appendBenchmarkQString();
 };
 
 ShortStringTest::ShortStringTest()
@@ -138,12 +151,42 @@ void ShortStringTest::appendsWithPushBack()
     constexpr auto c = "1234567";
     {
         ShortString s;
-        s.push_back("12345678");
+        s.push_back("1234567");
         QCOMPARE(QString(s), QString(c));
     }
     {
         ShortString s{"1"};
-        s.push_back("2345678");
+        s.push_back("234567");
+        QCOMPARE(QString(s), QString(c));
+    }
+    {
+        ShortString s("123456");
+        s.push_back('7');
+        QCOMPARE(QString(s), QString(c));
+    }
+    {
+        ShortString s;
+        s.push_back('1');
+        QCOMPARE(QString(s), QString("1"));
+    }
+}
+
+void ShortStringTest::pushBackCutsExcessiveData()
+{
+    constexpr auto c = "1234567";
+    {
+        ShortString s;
+        s.push_back("123456789");
+        QCOMPARE(QString(s), QString(c));
+    }
+    {
+        ShortString s("12345");
+        s.push_back("6789");
+        QCOMPARE(QString(s), QString(c));
+    }
+    {
+        ShortString s("1234567");
+        s.push_back('8');
         QCOMPARE(QString(s), QString(c));
     }
 }
@@ -268,6 +311,103 @@ void ShortStringTest::stdCopyableReverse()
     }
 }
 
+template <typename C>
+void compareBench(){
+    constexpr auto count = 8192;
+    for(int j = 0; j < count; ++j){
+        C s1 = "1234567";
+        C s2 = "1234567";
+        s1 == s2;
+    }
+}
+void ShortStringTest::compareBenchmark(){
+    QBENCHMARK{
+        compareBench<ShortString>();
+    }
+}
+void ShortStringTest::compareBenchmarkString(){
+    QBENCHMARK{
+        compareBench<std::string>();
+    }
+}
+void ShortStringTest::compareBenchmarkQString(){
+    QBENCHMARK{
+        compareBench<QString>();
+    }
+}
+template <typename C>
+void initBench(){
+    constexpr auto count = 8192;
+    for(int j = 0; j < count; ++j){
+        C s = "1234567";
+        Q_UNUSED(s);
+    }
+}
+void ShortStringTest::initBenchmark(){
+    QBENCHMARK{
+        initBench<ShortString>();
+    }
+}
+void ShortStringTest::initBenchmarkString(){
+    QBENCHMARK{
+        initBench<std::string>();
+    }
+}
+void ShortStringTest::initBenchmarkQString(){
+    QBENCHMARK{
+        initBench<QString>();
+    }
+}
+template <typename C>
+void pushBench(){
+    constexpr auto count = 8192;
+    C v[count];
+    for(int i = 0; i < 8; ++i){
+        for(int j = 0; j < count; ++j){
+            v[j].push_back('1');
+        }
+    }
+}
+void ShortStringTest::pushBenchmark(){
+    QBENCHMARK{
+        pushBench<ShortString>();
+    }
+}
+void ShortStringTest::pushBenchmarkString(){
+    QBENCHMARK{
+        pushBench<std::string>();
+    }
+}
+
+void ShortStringTest::pushBenchmarkQString(){
+    QBENCHMARK{
+        pushBench<QString>();
+    }
+}
+template <typename C>
+void appendBench(){
+    constexpr auto count = 8192;
+    C v[count];
+    for(int j = 0; j < count; ++j){
+        v[j].append("1234");
+        v[j].append("567");
+    }
+}
+void ShortStringTest::appendBenchmark(){
+    QBENCHMARK{
+        appendBench<ShortString>();
+    }
+}
+void ShortStringTest::appendBenchmarkString(){
+    QBENCHMARK{
+        appendBench<std::string>();
+    }
+}
+void ShortStringTest::appendBenchmarkQString(){
+    QBENCHMARK{
+        appendBench<QString>();
+    }
+}
 
 QTEST_APPLESS_MAIN(ShortStringTest)
 
