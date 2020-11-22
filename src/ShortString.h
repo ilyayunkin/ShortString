@@ -105,6 +105,10 @@ struct BasicShortString
     {
         return !std::strcmp(buf.data(),  sr.buf.data());
     }
+    constexpr bool operator <(const BasicShortString &sr)
+    {
+        return std::strcmp(buf.data(),  sr.buf.data()) == -1;
+    }
 };
 template <int len>
 constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr)

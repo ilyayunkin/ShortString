@@ -19,17 +19,19 @@ private slots:
     void ctorFits7Bytes();
     void assignCuts8Byte();
     void sizeAndLengthReturnTheSame();
+    void assignable();
     void assignedStringIsNotEmpty();
     void emptyAssignedStringIsEmpty();
     void appendsWithPlusEqual();
     void appendsWithPushBack();
     void pushBackCutsExcessiveData();
-    void comparableWithRawStrings();
+    void comparable();
     void castableToStdString();
     void frontReturnsFirstChar();
     void backReturnsLastChar();
     void stdCopyableDirect();
     void stdCopyableReverse();
+    void stdSwapable();
     void compareBenchmark();
     void compareBenchmarkString();
     void compareBenchmarkQString();
@@ -42,6 +44,9 @@ private slots:
     void appendBenchmark();
     void appendBenchmarkString();
     void appendBenchmarkQString();
+    void sortBenchmark();
+    void sortBenchmarkString();
+    void sortBenchmarkQString();
 };
 
 ShortStringTest::ShortStringTest()
@@ -110,6 +115,21 @@ void ShortStringTest::sizeAndLengthReturnTheSame()
         ShortString s;
         QCOMPARE(s.size(), 0u);
         QCOMPARE(s.size(), s.length());
+    }
+}
+
+void ShortStringTest::assignable()
+{
+    {
+        ShortString s;
+        s = "1234567";
+        QCOMPARE(QString(s), QString("1234567"));
+    }
+    {
+        ShortString s;
+        ShortString s2("1234567");
+        s = s2;
+        QCOMPARE(QString(s), QString("1234567"));
     }
 }
 
@@ -191,11 +211,28 @@ void ShortStringTest::pushBackCutsExcessiveData()
     }
 }
 
-void ShortStringTest::comparableWithRawStrings()
+void ShortStringTest::comparable()
 {
-    constexpr auto c = "1234567";
-    ShortString s{"1234567"};
-    QVERIFY(s == c);
+    {
+        constexpr auto c = "1234567";
+        ShortString s{"1234567"};
+        QVERIFY(s == c);
+    }
+    {
+        ShortString s = "1234567";
+        ShortString s1{"1234567"};
+        QVERIFY(s == s1);
+    }
+    {
+        constexpr auto c = "1234567";
+        ShortString s{"123456"};
+        QVERIFY(s != c);
+    }
+    {
+        ShortString s = "1234567";
+        ShortString s1{"123456"};
+        QVERIFY(s != s1);
+    }
 }
 
 void ShortStringTest::castableToStdString()
@@ -311,6 +348,15 @@ void ShortStringTest::stdCopyableReverse()
     }
 }
 
+void ShortStringTest::stdSwapable()
+{
+    ShortString s1{"Hello"};
+    ShortString s2{"World"};
+    std::swap(s1, s2);
+    QCOMPARE(QString("Hello"), QString(s2));
+    QCOMPARE(QString("World"), QString(s1));
+}
+
 template <typename C>
 void compareBench(){
     constexpr auto count = 8192;
@@ -406,6 +452,30 @@ void ShortStringTest::appendBenchmarkString(){
 void ShortStringTest::appendBenchmarkQString(){
     QBENCHMARK{
         appendBench<QString>();
+    }
+}
+template <typename C>
+void sortBench(){
+    constexpr auto count = 8192;
+    C v[count];
+    for(int j = 0; j < count; ++j){
+        v[j] = QString::number(j).toLatin1().data();
+    }
+    std::sort(std::begin(v), std::end(v));
+}
+void ShortStringTest::sortBenchmark(){
+    QBENCHMARK{
+        sortBench<ShortString>();
+    }
+}
+void ShortStringTest::sortBenchmarkString(){
+    QBENCHMARK{
+        sortBench<std::string>();
+    }
+}
+void ShortStringTest::sortBenchmarkQString(){
+    QBENCHMARK{
+        sortBench<QString>();
     }
 }
 
