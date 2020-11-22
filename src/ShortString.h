@@ -13,22 +13,25 @@ template <int len>
 struct BasicShortString
 {
     std::array<char, len> buf;
-    constexpr BasicShortString() : buf({'\0'}){}
+    constexpr BasicShortString() : buf({'\0'}){
+        buf[len - 1] = len - 1;
+    }
     constexpr BasicShortString(const char *const s){
+        buf[len - 1] = len - 1;
         auto outp = s;
         auto inp = buf.begin();
-        while(*outp != 0 && (inp - buf.begin())
-              < static_cast<int>(buf.size() - 1)){
+        while(*outp != 0 && buf[len - 1]){
             *inp = *outp;
             ++inp;
             ++outp;
+            --(buf[len - 1]);
             assert(inp < buf.end());
         }
         *inp = '\0';
     };
 
     constexpr auto capacity()const{return len - 1;}
-    constexpr auto size()const{return std::strlen(buf.data());}
+    constexpr auto size()const{return capacity() - buf[len - 1];}
     constexpr auto length()const{return size();}
     constexpr auto empty()const{return buf[0] == '\0';}
 
@@ -61,13 +64,14 @@ struct BasicShortString
     constexpr auto back(){return *std::prev(end());}
 
     void operator=(const char *const s){
+        buf[len - 1] = len - 1;
         auto outp = s;
         auto inp = buf.begin();
-        while(*outp != 0 && (inp - buf.begin())
-              < static_cast<int>(buf.size() - 1)){
+        while(*outp != 0 && buf[len - 1]){
             *inp = *outp;
             ++inp;
             ++outp;
+            --(buf[len - 1]);
         }
         *inp = '\0';
         assert(inp < buf.end());
@@ -75,20 +79,21 @@ struct BasicShortString
     void operator+=(const char *const s){
         auto outp = s;
         auto inp = end();
-        while(*outp != 0 && (inp - buf.begin())
-              < static_cast<int>(buf.size() - 1)){
+        while(*outp != 0 && buf[len - 1]){
             *inp = *outp;
             ++inp;
             ++outp;
+            --(buf[len - 1]);
         }
         *inp = '\0';
         assert(inp < buf.end());
     };
     void operator+=(const char c){
         auto inp = end();
-        if(inp - begin() < capacity()){
+        if(buf[len - 1]){
             *inp = c;
             ++inp;
+            --(buf[len - 1]);
         }
         *inp = '\0';
         assert(inp < buf.end());
@@ -109,5 +114,6 @@ constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr)
 
 typedef BasicShortString<8> ShortString;
 static_assert (std::is_trivially_copyable<ShortString>::value);
+static_assert (sizeof(ShortString) == 8);
 
 #endif // SHORTSTRING_H
