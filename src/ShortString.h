@@ -10,9 +10,9 @@
 // len is the result of sizeof().
 // Maximal string lingth is len - 1
 template <int len>
-struct BasicShortString
+class BasicShortString
 {
-    char buf[len];
+public:
     constexpr BasicShortString() noexcept : buf({'\0'}){
         buf[len - 1] = len - 1;
     }
@@ -101,18 +101,17 @@ struct BasicShortString
     void push_back(const char *const s) noexcept{operator+=(s);}
     void append(const char *const s) noexcept{operator+=(s);}
     void push_back(const char c) noexcept{operator+=(c);}
-    constexpr bool operator ==(const BasicShortString &sr) noexcept
-    {
+    constexpr bool operator ==(const BasicShortString &sr) noexcept{
         return !std::strcmp(buf,  sr.buf);
     }
-    constexpr bool operator <(const BasicShortString &sr) noexcept
-    {
+    constexpr bool operator <(const BasicShortString &sr) noexcept{
         return std::strcmp(buf,  sr.buf) == -1;
     }
+private:
+    char buf[len];
 };
 template <int len>
-constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr) noexcept
-{
+constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr) noexcept{
     return !std::strcmp(sl,  sr);
 }
 
