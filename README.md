@@ -1,5 +1,5 @@
 # ShortString
-An **std::array** based string template. 
+An array-based string template. 
 Can fit into a pointer's size. 
 **Never allocates memory**. 
 Cuts longer strings.
