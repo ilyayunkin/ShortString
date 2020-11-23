@@ -66,9 +66,16 @@ void ShortStringTest::sizeof8()
 
 void ShortStringTest::defaultCtorMakesEmptyString()
 {
-    ShortString s;
-    QCOMPARE(QString(s), QString(""));
-    QVERIFY(s.empty());
+    {
+        ShortString s;
+        QCOMPARE(QString(s), QString(""));
+        QVERIFY(s.empty());
+    }
+    {
+        ShortString16 s;
+        QCOMPARE(QString(s), QString(""));
+        QVERIFY(s.empty());
+    }
 }
 
 void ShortStringTest::initializedStringIsNotEmpty()
@@ -126,7 +133,18 @@ void ShortStringTest::assignable()
         QCOMPARE(QString(s), QString("1234567"));
     }
     {
+        ShortString16 s;
+        s = "1234567ABCDEFG";
+        QCOMPARE(QString(s), QString("1234567ABCDEFG"));
+    }
+    {
         ShortString s;
+        ShortString s2("1234567");
+        s = s2;
+        QCOMPARE(QString(s), QString("1234567"));
+    }
+    {
+        ShortString16 s;
         ShortString s2("1234567");
         s = s2;
         QCOMPARE(QString(s), QString("1234567"));
@@ -153,15 +171,30 @@ void ShortStringTest::emptyAssignedStringIsEmpty()
 
 void ShortStringTest::appendsWithPlusEqual()
 {
-    constexpr auto c = "1234567";
     {
-        ShortString s;
-        s+= "12345678";
+        constexpr auto c = "1234567";
+        {
+            ShortString s;
+            s+= "12345678";
+            QCOMPARE(QString(s), QString(c));
+        }
+        {
+            ShortString s{"1"};
+            s += "2345678";
+            QCOMPARE(QString(s), QString(c));
+        }
+    }
+    {
+        constexpr auto c = "12345678";
+        ShortString16 s{"1"};
+        s += "2345678";
         QCOMPARE(QString(s), QString(c));
     }
     {
-        ShortString s{"1"};
-        s += "2345678";
+        constexpr auto c = "1234567ABCDEFG";
+        ShortString16 s;
+        s+= "1234567";
+        s+= "ABCDEFG";
         QCOMPARE(QString(s), QString(c));
     }
 }
@@ -224,6 +257,11 @@ void ShortStringTest::comparable()
         QVERIFY(s == s1);
     }
     {
+        ShortString s = "1234567";
+        ShortString16 s1{"1234567"};
+        QVERIFY(s == s1);
+    }
+    {
         constexpr auto c = "1234567";
         ShortString s{"123456"};
         QVERIFY(s != c);
@@ -231,6 +269,11 @@ void ShortStringTest::comparable()
     {
         ShortString s = "1234567";
         ShortString s1{"123456"};
+        QVERIFY(s != s1);
+    }
+    {
+        ShortString s = "1234567";
+        ShortString16 s1{"12345678"};
         QVERIFY(s != s1);
     }
 }
