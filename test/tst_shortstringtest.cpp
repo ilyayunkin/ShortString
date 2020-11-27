@@ -47,6 +47,12 @@ private slots:
     void sortBenchmark();
     void sortBenchmarkString();
     void sortBenchmarkQString();
+    void copyBenchmark();
+    void copyBenchmarkString();
+    void copyBenchmarkQString();
+    void moveBenchmark();
+    void moveBenchmarkString();
+    void moveBenchmarkQString();
 };
 
 ShortStringTest::ShortStringTest()
@@ -460,19 +466,21 @@ template <typename C>
 void appendBench(){
     constexpr auto count = 8192;
     C v[count];
-    for(int j = 0; j < count; ++j){
-        v[j].append("1234");
-        v[j].append("567");
+    QBENCHMARK{
+        for(int j = 0; j < count; ++j){
+            v[j].append("1234");
+            v[j].append("567");
+        }
     }
 }
 void ShortStringTest::appendBenchmark(){
-    QBENCHMARK{ appendBench<ShortString>(); }
+    appendBench<ShortString>();
 }
 void ShortStringTest::appendBenchmarkString(){
-    QBENCHMARK{ appendBench<std::string>(); }
+    appendBench<std::string>();
 }
 void ShortStringTest::appendBenchmarkQString(){
-    QBENCHMARK{ appendBench<QString>(); }
+    appendBench<QString>();
 }
 template <typename C>
 void sortBench(){
@@ -481,16 +489,55 @@ void sortBench(){
     for(int j = 0; j < count; ++j){
         v[j] = QString::number(j).toLatin1().data();
     }
-    std::sort(std::begin(v), std::end(v));
+    QBENCHMARK{
+        std::sort(std::begin(v), std::end(v));
+    }
 }
 void ShortStringTest::sortBenchmark(){
-    QBENCHMARK{ sortBench<ShortString>(); }
+    sortBench<ShortString>();
 }
 void ShortStringTest::sortBenchmarkString(){
-    QBENCHMARK{ sortBench<std::string>(); }
+    sortBench<std::string>();
 }
 void ShortStringTest::sortBenchmarkQString(){
-    QBENCHMARK{ sortBench<QString>(); }
+    sortBench<QString>();
+}
+template <typename C>
+void copyBench(){
+    constexpr auto count = 8192;
+    for(int j = 0; j < count; ++j){
+        C s("1234567");
+        C s1(s);
+    }
+}
+void ShortStringTest::copyBenchmark(){
+    QBENCHMARK{ copyBench<ShortString>(); }
+}
+void ShortStringTest::copyBenchmarkString(){
+    QBENCHMARK{ copyBench<std::string>(); }
+}
+void ShortStringTest::copyBenchmarkQString(){
+    QBENCHMARK{ copyBench<QString>(); }
+}
+template <typename C>
+void moveBench(){
+    constexpr auto count = 8192;
+    std::vector<C> v;
+    v.reserve(count);
+    QBENCHMARK{
+        for(int j = 0; j < count; ++j){
+            v.push_back(C("1234567"));
+        }
+    }
+}
+void ShortStringTest::moveBenchmark(){
+    moveBench<ShortString>();
+}
+void ShortStringTest::moveBenchmarkString(){
+    moveBench<std::string>();
+}
+void ShortStringTest::moveBenchmarkQString(){
+    moveBench<QString>();
 }
 
 QTEST_APPLESS_MAIN(ShortStringTest)
