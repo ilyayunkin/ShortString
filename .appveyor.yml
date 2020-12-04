@@ -1,32 +1,32 @@
+image:
+  - Visual Studio 2015
+  - Ubuntu
+
 branches:
   only:
     - master
     
 install:
-  - set QTDIR=C:\Qt\5.13\mingw73_32
-  - set QT_TOOLS_DIR=C:\Qt\Tools\mingw730_32\ 
-  - set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin;%PATH%
+  - cmd: set QTDIR=C:\Qt\5.13\mingw73_32
+  - cmd: set QT_TOOLS_DIR=C:\Qt\Tools\mingw730_32\ 
+  - cmd: set PATH=%QTDIR%\bin;C:\Qt\Tools\mingw730_32\bin;%PATH%
+  - sh: PATH=$HOME/Qt/5.14.2/gcc_64/bin:$PATH
   - qmake -v
-  - dir C:\Qt\
-  - dir C:\Qt\5.13\
-  - dir %QTDIR%
-  - dir %QTDIR%\bin
-  - dir %QTDIR%\lib
-  - dir C:\Qt\Tools\
-  - dir C:\Qt\Tools\QtCreator
-  - dir C:\Qt\Tools\QtCreator\bin
-  - dir %QT_TOOLS_DIR%\  
-  - dir %QT_TOOLS_DIR%\bin
-  - dir %QT_TOOLS_DIR%\lib
-  - dir C:\OpenSSL-Win32\bin
-  - dir C:\OpenSSL-Win32\lib
-  
 
 build_script:
-  - qmake test "CONFIG+=debug"
-  - mingw32-make check
-  - gcov -r debug\*.o
-  - bash <(curl -s https://codecov.io/bash)
+  - cd test
+  - qmake "CONFIG+=debug"
+  - sh: make check
+  - sh: ls
+  - sh: ls ../
+  # On linux everything is built in the current dir
+  - sh: gcov -r *.o
+  - sh: bash <(curl -s https://codecov.io/bash)
+  - cmd: mingw32-make check
+  # on windows everything is built in debug or release dir
+  - cmd: gcov -r debug\*.o
+  - cmd: dir
+  - cmd: dir ..\
 
 
 
