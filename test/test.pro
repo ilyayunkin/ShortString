@@ -14,3 +14,5 @@ HEADERS += \
 
 INCLUDEPATH += ../src/
 QMAKE_LFLAGS+= -pedantic-errors
+QMAKE_CXXFLAGS+= --coverage
+QMAKE_LFLAGS+= --coverage
