@@ -26,5 +26,8 @@ build_script:
   - qmake test "CONFIG+=debug"
   - mingw32-make check
   - gcov -r debug\*.o
+  - bash <(curl -s https://codecov.io/bash)
+
+
 
 
