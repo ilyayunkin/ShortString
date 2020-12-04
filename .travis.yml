@@ -1,0 +1,20 @@
+language: cpp
+dist: focal
+
+compiler:
+  - gcc
+  
+install:
+  - sudo apt-get update
+  - sudo apt install qt5-default qtbase5-dev qtmultimedia5-dev
+  - sudo pip install cpp-coveralls
+  - qmake -v
+
+script:
+  - qmake test "CONFIG+=debug"
+  - mingw32-make check
+  - gcov -r debug\*.o
+  - bash <(curl -s https://codecov.io/bash)
+  
+ after_success:
+  - coveralls -e Tests -E ".moc_*.cpp" -E ".*.moc*" -E ".rcc*" --gcov-options '\-lp'
