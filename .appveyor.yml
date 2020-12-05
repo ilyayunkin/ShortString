@@ -14,7 +14,7 @@ install:
   - qmake -v
 
 build_script:
-  - cd test
+  - cd ShortStringTests
   - qmake "CONFIG+=debug"
   - sh: make check
   - sh: ls

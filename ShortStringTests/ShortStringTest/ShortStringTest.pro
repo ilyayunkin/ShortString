@@ -10,9 +10,9 @@ TEMPLATE = app
 SOURCES +=  tst_shortstringtest.cpp
 
 HEADERS += \
-    ../src/ShortString.h
+    ../../src/ShortString.h
 
-INCLUDEPATH += ../src/
+INCLUDEPATH += ../../src/
 QMAKE_LFLAGS+= -pedantic-errors
 QMAKE_CXXFLAGS+= --coverage
 QMAKE_LFLAGS+= --coverage
