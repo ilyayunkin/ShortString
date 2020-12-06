@@ -13,7 +13,7 @@ template <int len>
 class BasicShortString
 {
 public:
-    constexpr BasicShortString() noexcept : buf({'\0'}){
+    constexpr BasicShortString() noexcept : buf{'\0'}{
         buf[len - 1] = len - 1;
     }
     constexpr BasicShortString(const char *const s) noexcept{
