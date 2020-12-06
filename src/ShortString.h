@@ -63,7 +63,7 @@ public:
     [[nodiscard]]inline constexpr auto back()const noexcept{return *std::prev(end());}
     [[nodiscard]]inline constexpr auto back() noexcept{return *std::prev(end());}
 
-    void operator=(const char *const s) noexcept{
+    BasicShortString &operator=(const char *const s) noexcept{
         buf[len - 1] = len - 1;
         auto outp = s;
         auto inp = std::begin(buf);
@@ -75,8 +75,9 @@ public:
         }
         *inp = '\0';
         assert(inp < std::end(buf));
+        return *this;
     };
-    void operator+=(const char *const s) noexcept{
+    BasicShortString &operator+=(const char *const s) noexcept{
         auto outp = s;
         auto inp = end();
         while(*outp != 0 && buf[len - 1]){
@@ -87,8 +88,9 @@ public:
         }
         *inp = '\0';
         assert(inp < std::end(buf));
+        return *this;
     };
-    void operator+=(const char c) noexcept{
+    BasicShortString &operator+=(const char c) noexcept{
         auto inp = end();
         if(buf[len - 1]){
             *inp = c;
@@ -97,10 +99,14 @@ public:
         }
         *inp = '\0';
         assert(inp < std::end(buf));
+        return *this;
     };
     inline void push_back(const char *const s) noexcept{operator+=(s);}
-    inline void append(const char *const s) noexcept{operator+=(s);}
     inline void push_back(const char c) noexcept{operator+=(c);}
+    inline BasicShortString &append(const char *const s) noexcept{
+        operator+=(s);
+        return *this;
+    }
 private:
     char buf[len];
 };
