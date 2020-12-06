@@ -103,10 +103,7 @@ public:
     };
     inline void push_back(const char *const s) noexcept{operator+=(s);}
     inline void push_back(const char c) noexcept{operator+=(c);}
-    inline BasicShortString &append(const char *const s) noexcept{
-        operator+=(s);
-        return *this;
-    }
+    inline BasicShortString &append(const char *const s) noexcept{return operator+=(s);}
 private:
     char buf[len];
 };
