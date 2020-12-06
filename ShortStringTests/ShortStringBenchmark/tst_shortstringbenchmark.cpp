@@ -51,7 +51,7 @@ void compareBench(){
     for(int j = 0; j < count; ++j){
         C s1 = "1234567";
         C s2 = "1234567";
-        s1 == s2;
+        [[maybe_unused]]auto equal = s1 == s2;
     }
 }
 void ShortStringBenchmark::compareBenchmark(){

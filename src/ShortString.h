@@ -30,38 +30,38 @@ public:
         *inp = '\0';
     };
 
-    inline constexpr auto capacity()const noexcept{return len - 1;}
-    inline constexpr auto size()const noexcept{return capacity() - buf[len - 1];}
-    inline constexpr auto length()const noexcept{return size();}
-    inline constexpr auto empty()const noexcept{return buf[0] == '\0';}
+    [[nodiscard]]inline constexpr auto capacity()const noexcept{return len - 1;}
+    [[nodiscard]]inline constexpr auto size()const noexcept{return capacity() - buf[len - 1];}
+    [[nodiscard]]inline constexpr auto length()const noexcept{return size();}
+    [[nodiscard]]inline constexpr auto empty()const noexcept{return buf[0] == '\0';}
 
-    inline constexpr auto begin()const noexcept{return std::begin(buf);}
-    inline constexpr auto end()const noexcept{return std::begin(buf) + size();}
-    inline constexpr auto begin() noexcept{return std::begin(buf);}
-    inline constexpr auto end() noexcept{return std::begin(buf) + size();}
+    [[nodiscard]]inline constexpr auto begin()const noexcept{return std::begin(buf);}
+    [[nodiscard]]inline constexpr auto end()const noexcept{return std::begin(buf) + size();}
+    [[nodiscard]]inline constexpr auto begin() noexcept{return std::begin(buf);}
+    [[nodiscard]]inline constexpr auto end() noexcept{return std::begin(buf) + size();}
 
-    inline constexpr auto cbegin()const noexcept{return std::cbegin(buf);}
-    inline constexpr auto cend()const noexcept{return std::cbegin(buf) + size();}
+    [[nodiscard]]inline constexpr auto cbegin()const noexcept{return std::cbegin(buf);}
+    [[nodiscard]]inline constexpr auto cend()const noexcept{return std::cbegin(buf) + size();}
 
-    inline constexpr auto rbegin()const noexcept{return std::rend(buf) - size();}
-    inline constexpr auto rend()const noexcept{return std::rend(buf);}
-    inline constexpr auto rbegin() noexcept{return std::rend(buf) - size();}
-    inline constexpr auto rend() noexcept{return std::rend(buf);}
+    [[nodiscard]]inline constexpr auto rbegin()const noexcept{return std::rend(buf) - size();}
+    [[nodiscard]]inline constexpr auto rend()const noexcept{return std::rend(buf);}
+    [[nodiscard]]inline constexpr auto rbegin() noexcept{return std::rend(buf) - size();}
+    [[nodiscard]]inline constexpr auto rend() noexcept{return std::rend(buf);}
 
-    inline constexpr auto crbegin()const noexcept{return std::crend(buf) - size();}
-    inline constexpr auto crend()const noexcept{return std::crend(buf);}
+    [[nodiscard]]inline constexpr auto crbegin()const noexcept{return std::crend(buf) - size();}
+    [[nodiscard]]inline constexpr auto crend()const noexcept{return std::crend(buf);}
 
-    inline constexpr operator char*() noexcept{return buf;}
-    inline constexpr operator const char*()const noexcept{return buf;}
+    [[nodiscard]]inline constexpr operator char*() noexcept{return buf;}
+    [[nodiscard]]inline constexpr operator const char*()const noexcept{return buf;}
 
     //Returns a reference to the first element in the container.
     //Calling front on an empty container is undefined behaviour.
-    inline constexpr auto front()const noexcept{return *begin();}
-    inline constexpr auto front() noexcept{return *begin();}
+    [[nodiscard]]inline constexpr auto front()const noexcept{return *begin();}
+    [[nodiscard]]inline constexpr auto front() noexcept{return *begin();}
     //Returns a reference to the last element in the container.
     //Calling back on an empty container causes undefined behavior.
-    inline constexpr auto back()const noexcept{return *std::prev(end());}
-    inline constexpr auto back() noexcept{return *std::prev(end());}
+    [[nodiscard]]inline constexpr auto back()const noexcept{return *std::prev(end());}
+    [[nodiscard]]inline constexpr auto back() noexcept{return *std::prev(end());}
 
     void operator=(const char *const s) noexcept{
         buf[len - 1] = len - 1;
@@ -105,15 +105,15 @@ private:
     char buf[len];
 };
 template <int len>
-inline constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr) noexcept{
+[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr) noexcept{
     return !std::strcmp(sl,  sr);
 }
 template <int lenL, int lenR>
-inline constexpr bool operator ==(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
+[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
     return !std::strcmp(sl,  sr);
 }
 template <int lenL, int lenR>
-inline constexpr bool operator <(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
+[[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
     return std::strcmp(sl,  sr) == -1;
 }
 
