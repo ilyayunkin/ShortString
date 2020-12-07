@@ -13,6 +13,7 @@ template <int len>
 class BasicShortString
 {
 public:
+    typedef typename std::size_t size_type;
     typedef char*  iterator;
     typedef const char* const_iterator;
     typedef std::reverse_iterator<const_iterator>	const_reverse_iterator;
@@ -34,9 +35,9 @@ public:
         *inp = '\0';
     };
 
-    [[nodiscard]]inline constexpr auto capacity()const noexcept{return len - 1;}
-    [[nodiscard]]inline constexpr auto size()const noexcept{return capacity() - buf[len - 1];}
-    [[nodiscard]]inline constexpr auto length()const noexcept{return size();}
+    [[nodiscard]]inline constexpr size_type capacity()const noexcept{return len - 1;}
+    [[nodiscard]]inline constexpr size_type size()const noexcept{return capacity() - buf[len - 1];}
+    [[nodiscard]]inline constexpr size_type length()const noexcept{return size();}
     [[nodiscard]]inline constexpr auto empty()const noexcept{return buf[0] == '\0';}
 
     [[nodiscard]]inline constexpr auto begin()const noexcept{return std::begin(buf);}
