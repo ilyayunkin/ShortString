@@ -32,6 +32,8 @@ private slots:
     void stdCopyableDirect();
     void stdCopyableReverse();
     void stdSwapable();
+    void canBeReadByIndex();
+    void canBeModifiedByIndex();
 };
 
 ShortStringTest::ShortStringTest()
@@ -383,6 +385,39 @@ void ShortStringTest::stdSwapable()
     std::swap(s1, s2);
     QCOMPARE(QString("Hello"), QString(s2));
     QCOMPARE(QString("World"), QString(s1));
+}
+
+void ShortStringTest::canBeReadByIndex()
+{
+    {
+        constexpr char string[] = "1234567";
+        ShortString s(string);
+        for(unsigned i = 0; i < sizeof(string); ++i){
+            QCOMPARE(s[i], string[i]);
+        }
+    }
+    {
+        constexpr char string[] = "1234567";
+        const ShortString s(string);
+        for(unsigned i = 0; i < sizeof(string); ++i){
+            QCOMPARE(s[i], string[i]);
+        }
+    }
+}
+
+void ShortStringTest::canBeModifiedByIndex()
+{
+    std::string string = "1234567";
+    ShortString s(string.data());
+    for(unsigned i = 0; i < string.size(); ++i){
+        s[i] = string[string.size() - i - 1];
+    }
+
+    std::reverse(std::begin(string), std::end(string));
+
+    for(unsigned i = 0; i < string.size(); ++i){
+        QCOMPARE(s[i], string[i]);
+    }
 }
 
 QTEST_APPLESS_MAIN(ShortStringTest)
