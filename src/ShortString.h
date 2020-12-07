@@ -13,6 +13,10 @@ template <int len>
 class BasicShortString
 {
 public:
+    typedef char*  iterator;
+    typedef const char* const_iterator;
+    typedef std::reverse_iterator<const_iterator>	const_reverse_iterator;
+    typedef std::reverse_iterator<iterator>		reverse_iterator;
     constexpr BasicShortString() noexcept : buf{'\0'}{
         buf[len - 1] = len - 1;
     }

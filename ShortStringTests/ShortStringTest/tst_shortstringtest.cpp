@@ -34,6 +34,8 @@ private slots:
     void stdSwapable();
     void canBeReadByIndex();
     void canBeModifiedByIndex();
+    void providesApplyableIteratorTypes();
+    void providesApplyableConstIteratorTypes();
 };
 
 ShortStringTest::ShortStringTest()
@@ -408,15 +410,69 @@ void ShortStringTest::canBeReadByIndex()
 void ShortStringTest::canBeModifiedByIndex()
 {
     std::string string = "1234567";
-    ShortString s(string.data());
+    ShortString s("0000000");
     for(unsigned i = 0; i < string.size(); ++i){
         s[i] = string[string.size() - i - 1];
     }
 
     std::reverse(std::begin(string), std::end(string));
 
-    for(unsigned i = 0; i < string.size(); ++i){
-        QCOMPARE(s[i], string[i]);
+    QCOMPARE(QString(string.data()), QString(s));
+}
+
+void ShortStringTest::providesApplyableIteratorTypes()
+{
+    {
+        std::string string = "1234567";
+        ShortString s("0000000");
+        auto it = string.rbegin();
+        ShortString::iterator sIt = s.begin();
+        while(it != string.rend()){
+            *sIt = *it;
+            ++it;
+            ++sIt;
+        }
+
+        std::reverse(std::begin(string), std::end(string));
+
+        QCOMPARE(QString(string.data()), QString(s));
+    }
+    {
+        std::string string = "1234567";
+        ShortString s("0000000");
+        auto it = string.begin();
+        ShortString::reverse_iterator sIt = s.rbegin();
+        while(it != string.end()){
+            *sIt = *it;
+            ++it;
+            ++sIt;
+        }
+
+        std::reverse(std::begin(string), std::end(string));
+
+        QCOMPARE(QString(string.data()), QString(s));
+    }
+}
+
+void ShortStringTest::providesApplyableConstIteratorTypes()
+{
+    {
+        constexpr char string[] = "1234567";
+        const ShortString s(string);
+        int i = 0;
+        for(ShortString::const_iterator it = s.cbegin(); it != s.cend(); ++it){
+            QCOMPARE(*it, string[i]);
+            ++i;
+        }
+    }
+    {
+        constexpr char string[] = "1234567";
+        const ShortString s(string);
+        int i = strlen(string) - 1;
+        for(ShortString::const_reverse_iterator it = s.crbegin(); it != s.crend(); ++it){
+            QCOMPARE(*it, string[i]);
+            --i;
+        }
     }
 }
 
