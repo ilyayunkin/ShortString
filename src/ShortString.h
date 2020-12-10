@@ -28,7 +28,7 @@ public:
     constexpr BasicShortString() noexcept : buf{'\0'}{
         buf[len - 1] = len - 1;
     }
-    constexpr BasicShortString(const char *const s) noexcept{
+    constexpr BasicShortString(const char *const s) noexcept : buf{'\0'}{
         buf[len - 1] = len - 1;
         auto outp = s;
         auto inp = std::begin(buf);
