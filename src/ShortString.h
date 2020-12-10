@@ -43,9 +43,11 @@ public:
     };
 
     [[nodiscard]]inline constexpr size_type capacity()const noexcept{return len - 1;}
-    [[nodiscard]]inline constexpr size_type size()const noexcept{return capacity() - buf[len - 1];}
+    [[nodiscard]]inline constexpr size_type size()const noexcept{return capacity() - freeSpace();}
     [[nodiscard]]inline constexpr size_type length()const noexcept{return size();}
+    [[nodiscard]]inline constexpr size_type freeSpace()const noexcept{return buf[len - 1];}
     [[nodiscard]]inline constexpr auto empty()const noexcept{return buf[0] == '\0';}
+    [[nodiscard]]inline constexpr auto full()const noexcept{return size() == capacity();}
 
     [[nodiscard]]inline constexpr auto begin()const noexcept{return std::begin(buf);}
     [[nodiscard]]inline constexpr auto end()const noexcept{return std::begin(buf) + size();}
@@ -116,6 +118,22 @@ public:
     inline void push_back(const char *const s) noexcept{operator+=(s);}
     inline void push_back(const char c) noexcept{operator+=(c);}
     inline BasicShortString &append(const char *const s) noexcept{return operator+=(s);}
+    [[nodiscard]]constexpr BasicShortString operator+(const BasicShortString &sr)const noexcept{
+        if(full()){
+            return *this;
+        }else{
+            BasicShortString ret(*this);
+            const auto addSize = std::min(freeSpace(), sr.size());
+            for(size_type i = 0; i < addSize; ++i){
+                ret.buf[size() + i] = sr.buf[i];
+            }
+            const auto newSize = size() + addSize;
+            assert(newSize < len);
+            ret.buf[newSize] = '\0';
+            ret.buf[len - 1] = capacity() - newSize;
+            return ret;
+        }
+    }
 private:
     char buf[len];
 };

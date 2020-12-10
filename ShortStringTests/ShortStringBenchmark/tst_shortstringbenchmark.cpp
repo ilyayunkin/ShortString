@@ -33,6 +33,9 @@ private slots:
     void moveBenchmark();
     void moveBenchmarkString();
     void moveBenchmarkQString();
+    void catBenchmark();
+    void catBenchmarkString();
+    void catBenchmarkQString();
 };
 
 ShortStringBenchmark::ShortStringBenchmark()
@@ -177,6 +180,26 @@ void ShortStringBenchmark::moveBenchmarkString(){
 }
 void ShortStringBenchmark::moveBenchmarkQString(){
     moveBench<QString>();
+}
+
+template <typename C>
+void catBench(){
+    C s1{"123"};
+    C s2{"123"};
+    QBENCHMARK{
+        [[maybe_unused]]auto s12 = s1 + s2;
+    }
+}
+void ShortStringBenchmark::catBenchmark(){
+    catBench<ShortString>();
+}
+
+void ShortStringBenchmark::catBenchmarkString(){
+    catBench<std::string>();
+}
+
+void ShortStringBenchmark::catBenchmarkQString(){
+    catBench<QString>();
 }
 
 QTEST_APPLESS_MAIN(ShortStringBenchmark)

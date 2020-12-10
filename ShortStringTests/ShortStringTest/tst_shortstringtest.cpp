@@ -16,12 +16,15 @@ private slots:
     void defaultCtorMakesEmptyString();
     void ctorGets1Byte();
     void initializedStringIsNotEmpty();
+    void full();
+    void freeSpace();
     void ctorFits7Bytes();
     void assignCuts8Byte();
     void sizeAndLengthReturnTheSame();
     void assignable();
     void assignedStringIsNotEmpty();
     void emptyAssignedStringIsEmpty();
+    void addition();
     void appendsWithPlusEqual();
     void appendsWithPushBack();
     void pushBackCutsExcessiveData();
@@ -59,11 +62,13 @@ void ShortStringTest::defaultCtorMakesEmptyString()
         constexpr ShortString s;
         QCOMPARE(QString(s), QString(""));
         QVERIFY(s.empty());
+        QVERIFY(!s.full());
     }
     {
         constexpr ShortString16 s;
         QCOMPARE(QString(s), QString(""));
         QVERIFY(s.empty());
+        QVERIFY(!s.full());
     }
 }
 
@@ -71,6 +76,38 @@ void ShortStringTest::initializedStringIsNotEmpty()
 {
     constexpr ShortString s{"1"};
     QVERIFY(!s.empty());
+}
+
+void ShortStringTest::full()
+{
+    {
+        constexpr ShortString s{"123456"};
+        QVERIFY(!s.full());
+    }
+    {
+        constexpr ShortString s{"1234567"};
+        QVERIFY(s.full());
+    }
+}
+
+void ShortStringTest::freeSpace()
+{
+    {
+        constexpr ShortString s;
+        QCOMPARE(s.freeSpace(), s.capacity());
+    }
+    {
+        constexpr ShortString s{"1"};
+        QCOMPARE(s.freeSpace(), 6u);
+    }
+    {
+        constexpr ShortString s{"123456"};
+        QCOMPARE(s.freeSpace(), 1u);
+    }
+    {
+        constexpr ShortString s{"1234567"};
+        QCOMPARE(s.freeSpace(), 0u);
+    }
 }
 
 void ShortStringTest::ctorGets1Byte()
@@ -156,6 +193,58 @@ void ShortStringTest::emptyAssignedStringIsEmpty()
     QVERIFY(!s.empty());
     s = "";
     QVERIFY(s.empty());
+}
+
+void ShortStringTest::addition()
+{
+    {
+        constexpr char etalon[] = "12345";
+        constexpr ShortString s1("123");
+        constexpr ShortString s2("45");
+        constexpr auto s12 = s1 + s2;
+        QCOMPARE(s12.size(), strlen(etalon));
+        QCOMPARE(QString(s12), etalon);
+    }
+    {
+        constexpr char etalon[] = "12345";
+        constexpr ShortString s1;
+        constexpr ShortString s2(etalon);
+        constexpr auto s12 = s1 + s2;
+        QCOMPARE(s12.size(), strlen(etalon));
+        QCOMPARE(QString(s12), etalon);
+    }
+    {
+        constexpr char etalon[] = "";
+        constexpr ShortString s1;
+        constexpr ShortString s2;
+        constexpr auto s12 = s1 + s2;
+        QCOMPARE(s12.size(), strlen(etalon));
+        QCOMPARE(QString(s12), etalon);
+    }
+    {
+        constexpr char etalon[] = "1234567";
+        constexpr ShortString s1(etalon);
+        constexpr ShortString s2;
+        constexpr auto s12 = s1 + s2;
+        QCOMPARE(s12.size(), strlen(etalon));
+        QCOMPARE(QString(s12), etalon);
+    }
+    {
+        constexpr char etalon[] = "1234567";
+        constexpr ShortString s1;
+        constexpr ShortString s2(etalon);
+        constexpr auto s12 = s1 + s2;
+        QCOMPARE(s12.size(), strlen(etalon));
+        QCOMPARE(QString(s12), etalon);
+    }
+    {
+        constexpr char etalon[] = "1234567";
+        constexpr ShortString s1(etalon);
+        constexpr ShortString s2(etalon);
+        constexpr auto s12 = s1 + s2;
+        QCOMPARE(s12.size(), strlen(etalon));
+        QCOMPARE(QString(s12), etalon);
+    }
 }
 
 void ShortStringTest::appendsWithPlusEqual()
