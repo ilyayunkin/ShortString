@@ -5,6 +5,7 @@
 */
 #include <cstring>
 #include <iterator>
+#include <limits>
 #include <assert.h>
 
 // len is the result of sizeof().
@@ -13,11 +14,17 @@ template <int len>
 class BasicShortString
 {
 public:
+    typedef char value_type;
     typedef typename std::size_t size_type;
     typedef char*  iterator;
     typedef const char* const_iterator;
     typedef std::reverse_iterator<const_iterator>	const_reverse_iterator;
     typedef std::reverse_iterator<iterator>		reverse_iterator;
+
+    // Vital because the last private aaray's element is used as the length counter
+    static_assert (len < std::numeric_limits<value_type>::max(), "Too big size of a ShortString instance");
+    static_assert (std::numeric_limits<value_type>::is_integer, "value_type must be integer");
+
     constexpr BasicShortString() noexcept : buf{'\0'}{
         buf[len - 1] = len - 1;
     }
