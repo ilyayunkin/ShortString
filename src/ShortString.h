@@ -41,7 +41,24 @@ public:
         }
         *inp = '\0';
     };
-
+    constexpr BasicShortString(const BasicShortString &) = default;
+    constexpr BasicShortString(BasicShortString &&) = default;
+    constexpr BasicShortString &operator=(const BasicShortString &) = default;
+    constexpr BasicShortString &operator=(BasicShortString &&) = default;
+    constexpr BasicShortString &operator=(const char *const s) noexcept{
+        buf[len - 1] = len - 1;
+        auto outp = s;
+        auto inp = std::begin(buf);
+        while(*outp != 0 && buf[len - 1]){
+            *inp = *outp;
+            ++inp;
+            ++outp;
+            --(buf[len - 1]);
+        }
+        *inp = '\0';
+        assert(inp < std::end(buf));
+        return *this;
+    };
     [[nodiscard]]inline constexpr size_type capacity()const noexcept{return len - 1;}
     [[nodiscard]]inline constexpr size_type size()const noexcept{return capacity() - freeSpace();}
     [[nodiscard]]inline constexpr size_type length()const noexcept{return size();}
@@ -77,20 +94,6 @@ public:
     [[nodiscard]]inline constexpr auto back()const noexcept{return *std::prev(end());}
     [[nodiscard]]inline constexpr auto back() noexcept{return *std::prev(end());}
 
-    BasicShortString &operator=(const char *const s) noexcept{
-        buf[len - 1] = len - 1;
-        auto outp = s;
-        auto inp = std::begin(buf);
-        while(*outp != 0 && buf[len - 1]){
-            *inp = *outp;
-            ++inp;
-            ++outp;
-            --(buf[len - 1]);
-        }
-        *inp = '\0';
-        assert(inp < std::end(buf));
-        return *this;
-    };
     BasicShortString &operator+=(const char *const s) noexcept{
         auto outp = s;
         auto inp = end();
