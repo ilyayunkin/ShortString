@@ -159,4 +159,44 @@ static_assert (std::is_trivially_copyable<ShortString>::value);
 static_assert (sizeof(ShortString) == 8);
 static_assert (sizeof(ShortString16) == 16);
 
+static_assert (ShortString{""}.empty());
+static_assert (!ShortString{"1"}.empty());
+static_assert (!ShortString{"123456"}.full());
+
+static_assert (ShortString{"1234567"}.full());
+static_assert ([]{constexpr ShortString s; return s.freeSpace() == s.capacity();}());
+static_assert ([]{constexpr ShortString s; return s.freeSpace() == static_cast<ShortString::size_type>(7);}());
+static_assert ([]{constexpr ShortString s{"1"}; return s.freeSpace() == static_cast<ShortString::size_type>(6);}());
+static_assert ([]{constexpr ShortString s{"123456"}; return s.freeSpace() == static_cast<ShortString::size_type>(1);}());
+static_assert ([]{constexpr ShortString s{"1234567"}; return s.freeSpace() == static_cast<ShortString::size_type>(0);}());
+
+static_assert (ShortString{"1234567"}.size() == static_cast<ShortString::size_type>(7));
+static_assert (ShortString{"1234567"}.length() == static_cast<ShortString::size_type>(7));
+static_assert (ShortString{"123"}.size() == static_cast<ShortString::size_type>(3));
+static_assert (ShortString{"123"}.length() == static_cast<ShortString::size_type>(3));
+static_assert (ShortString{""}.size() == static_cast<ShortString::size_type>(0));
+static_assert (ShortString{""}.length() == static_cast<ShortString::size_type>(0));
+static_assert (ShortString{}.size() == static_cast<ShortString::size_type>(0));
+static_assert (ShortString{}.length() == static_cast<ShortString::size_type>(0));
+static_assert ([]{constexpr ShortString s{"1234567"}; return s.back() == '7';}());
+static_assert ([]{constexpr ShortString s{"1234"}; return s.back() == '4';}());
+static_assert ([]{constexpr ShortString s{"1234567"}; return s.front() == '1';}());
+static_assert ([]{constexpr ShortString s{"1234"}; return s.front() == '1';}());
+
+static_assert ([]
+{
+constexpr char string[] = "1234567";
+constexpr ShortString s(string);
+int i = 0;
+for(ShortString::const_iterator it = s.cbegin(); it != s.cend(); ++it){
+    if(*it != string[i])
+        return false;
+    ++i;
+}
+return true;
+}(), "const_iterator test failed");
+
+//static_assert (ShortString{"1"} == "1"); // strcmp is not a constexpr function
+
+
 #endif // SHORTSTRING_H

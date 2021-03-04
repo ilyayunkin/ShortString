@@ -12,15 +12,9 @@ public:
     ~ShortStringTest();
 
 private slots:
-    void sizeof8();
-    void defaultCtorMakesEmptyString();
     void ctorGets1Byte();
-    void initializedStringIsNotEmpty();
-    void full();
-    void freeSpace();
     void ctorFits7Bytes();
     void assignCuts8Byte();
-    void sizeAndLengthReturnTheSame();
     void assignable();
     void assignedStringIsNotEmpty();
     void emptyAssignedStringIsEmpty();
@@ -32,8 +26,6 @@ private slots:
     void pushBackCutsExcessiveData();
     void comparable();
     void castableToStdString();
-    void frontReturnsFirstChar();
-    void backReturnsLastChar();
     void stdCopyableDirect();
     void stdCopyableReverse();
     void stdSwapable();
@@ -51,65 +43,6 @@ ShortStringTest::ShortStringTest()
 ShortStringTest::~ShortStringTest()
 {
 
-}
-
-void ShortStringTest::sizeof8()
-{
-    QCOMPARE(sizeof (ShortString), 8u);
-}
-
-void ShortStringTest::defaultCtorMakesEmptyString()
-{
-    {
-        constexpr ShortString s;
-        QCOMPARE(QString(s), QString(""));
-        QVERIFY(s.empty());
-        QVERIFY(!s.full());
-    }
-    {
-        constexpr ShortString16 s;
-        QCOMPARE(QString(s), QString(""));
-        QVERIFY(s.empty());
-        QVERIFY(!s.full());
-    }
-}
-
-void ShortStringTest::initializedStringIsNotEmpty()
-{
-    constexpr ShortString s{"1"};
-    QVERIFY(!s.empty());
-}
-
-void ShortStringTest::full()
-{
-    {
-        constexpr ShortString s{"123456"};
-        QVERIFY(!s.full());
-    }
-    {
-        constexpr ShortString s{"1234567"};
-        QVERIFY(s.full());
-    }
-}
-
-void ShortStringTest::freeSpace()
-{
-    {
-        constexpr ShortString s;
-        QCOMPARE(s.freeSpace(), s.capacity());
-    }
-    {
-        constexpr ShortString s{"1"};
-        QCOMPARE(s.freeSpace(), 6u);
-    }
-    {
-        constexpr ShortString s{"123456"};
-        QCOMPARE(s.freeSpace(), 1u);
-    }
-    {
-        constexpr ShortString s{"1234567"};
-        QCOMPARE(s.freeSpace(), 0u);
-    }
 }
 
 void ShortStringTest::ctorGets1Byte()
@@ -132,25 +65,6 @@ void ShortStringTest::assignCuts8Byte()
     ShortString s{"1"};
     s = "12345678";
     QCOMPARE(QString(s), QString(c));
-}
-
-void ShortStringTest::sizeAndLengthReturnTheSame()
-{
-    {
-        constexpr ShortString s{"1234567"};
-        QCOMPARE(s.size(), 7u);
-        QCOMPARE(s.size(), s.length());
-    }
-    {
-        constexpr ShortString s{"123"};
-        QCOMPARE(s.size(), 3u);
-        QCOMPARE(s.size(), s.length());
-    }
-    {
-        constexpr ShortString s;
-        QCOMPARE(s.size(), 0u);
-        QCOMPARE(s.size(), s.length());
-    }
 }
 
 void ShortStringTest::assignable()
@@ -350,53 +264,6 @@ void ShortStringTest::castableToStdString()
     QCOMPARE(stdS, c);
 }
 
-void ShortStringTest::frontReturnsFirstChar()
-{
-    constexpr auto c = '1';
-    {
-        ShortString s{"1234567"};
-        QCOMPARE(s.front(), c);
-    }
-    {
-        constexpr ShortString s{"1234567"};
-        QCOMPARE(s.front(), c);
-    }
-    {
-        ShortString s{"1234"};
-        QCOMPARE(s.front(), c);
-    }
-    {
-        constexpr ShortString s{"1234"};
-        QCOMPARE(s.front(), c);
-    }
-}
-
-void ShortStringTest::backReturnsLastChar()
-{
-    {
-        constexpr auto c = '7';
-        {
-            ShortString s{"1234567"};
-            QCOMPARE(s.back(), c);
-        }
-        {
-            constexpr ShortString s{"1234567"};
-            QCOMPARE(s.back(), c);
-        }
-    }
-    {
-        constexpr auto c = '4';
-        {
-            ShortString s{"1234"};
-            QCOMPARE(s.back(), c);
-        }
-        {
-            constexpr ShortString s{"1234"};
-            QCOMPARE(s.back(), c);
-        }
-    }
-}
-
 void ShortStringTest::stdCopyableDirect()
 {
     constexpr auto c = "1234567";
@@ -534,16 +401,7 @@ void ShortStringTest::providesApplyableConstIteratorTypes()
     {
         constexpr char string[] = "1234567";
         constexpr ShortString s(string);
-        int i = 0;
-        for(ShortString::const_iterator it = s.cbegin(); it != s.cend(); ++it){
-            QCOMPARE(*it, string[i]);
-            ++i;
-        }
-    }
-    {
-        constexpr char string[] = "1234567";
-        constexpr ShortString s(string);
-        int i = strlen(string) - 1;
+        int i = strlen(string) - 1; // strlen is not a constexpr function and can't be checked by static_assert
         for(ShortString::const_reverse_iterator it = s.crbegin(); it != s.crend(); ++it){
             QCOMPARE(*it, string[i]);
             --i;
