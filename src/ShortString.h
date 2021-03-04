@@ -142,11 +142,29 @@ private:
 };
 template <int len>
 [[nodiscard]]inline constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr) noexcept{
-    return !std::strcmp(sl,  sr);
+    auto leftIt = sl.cbegin();
+    auto rightIt = sr;
+    while((*leftIt != '\0') && (*rightIt != '\0')){
+        if(*leftIt != *rightIt){
+            return false;
+        }
+        ++leftIt;
+        ++rightIt;
+    }
+    return *rightIt == '\0' && *leftIt == '\0';
 }
 template <int lenL, int lenR>
 [[nodiscard]]inline constexpr bool operator ==(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
-    return !std::strcmp(sl,  sr);
+    auto leftIt = sl.cbegin();
+    auto rightIt = sr.cbegin();
+    while((*leftIt != '\0') && (*rightIt != '\0')){
+        if(*leftIt != *rightIt){
+            return false;
+        }
+        ++leftIt;
+        ++rightIt;
+    }
+    return *rightIt == '\0' && *leftIt == '\0';
 }
 template <int lenL, int lenR>
 [[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
@@ -183,6 +201,20 @@ static_assert ([]{constexpr ShortString s{"1234"}; return s.back() == '4';}());
 static_assert ([]{constexpr ShortString s{"1234567"}; return s.front() == '1';}());
 static_assert ([]{constexpr ShortString s{"1234"}; return s.front() == '1';}());
 
+static_assert (ShortString{"1234567"} == "1234567",         "String comparizon should work");
+static_assert (ShortString{"1234567"} == ShortString{"1234567"}, "String comparizon should work");
+static_assert (ShortString{"1234"} == "1234",               "String comparizon should work");
+static_assert (ShortString{"1234"} == ShortString{"1234"},  "String comparizon should work");
+static_assert (ShortString{""} == "",                       "String comparizon should work");
+static_assert (ShortString{""} == ShortString{""},          "String comparizon should work");
+
+static_assert (ShortString{"1234"} + ShortString{"567"} == "1234567", "String catenation should work");
+static_assert (ShortString{"1234"} + "567" == "1234567",    "String catenation should work");
+static_assert (ShortString{} + "1234567" == "1234567",      "String catenation should work");
+
+static_assert (ShortString{} + "12345678901" == "1234567",  "Strings should be cut to fit the internal buf");
+static_assert (ShortString{"12345678901"} == "1234567",     "Strings should be cut to fit the internal buf");
+
 static_assert ([]
 {
 constexpr char string[] = "1234567";
@@ -194,7 +226,7 @@ for(ShortString::const_iterator it = s.cbegin(); it != s.cend(); ++it){
     ++i;
 }
 return true;
-}(), "const_iterator test failed");
+}(),                                                        "const_iterator test failed");
 
 //static_assert (ShortString{"1"} == "1"); // strcmp is not a constexpr function
 
