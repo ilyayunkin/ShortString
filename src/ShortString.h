@@ -7,17 +7,20 @@
 #include <iterator>
 #include <limits>
 #include <assert.h>
+#include <string>
 
 // len is the result of sizeof().
 // Maximal string lingth is len - 1
-template <int len>
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
 class BasicShortString
 {
 public:
-    typedef char value_type;
+    typedef _CharT value_type;
     typedef typename std::size_t size_type;
-    typedef char*  iterator;
-    typedef const char* const_iterator;
+    typedef _CharT*  iterator;
+    typedef const _CharT* const_iterator;
     typedef std::reverse_iterator<const_iterator>	const_reverse_iterator;
     typedef std::reverse_iterator<iterator>		reverse_iterator;
 
@@ -28,7 +31,7 @@ public:
     constexpr BasicShortString() noexcept : buf{'\0'}{
         buf[len - 1] = len - 1;
     }
-    constexpr BasicShortString(const char *const s) noexcept : buf{'\0'}{
+    constexpr BasicShortString(const _CharT *const s) noexcept : buf{'\0'}{
         buf[len - 1] = len - 1;
         auto outp = s;
         auto inp = std::begin(buf);
@@ -45,7 +48,7 @@ public:
     constexpr BasicShortString(BasicShortString &&) = default;
     constexpr BasicShortString &operator=(const BasicShortString &) = default;
     constexpr BasicShortString &operator=(BasicShortString &&) = default;
-    constexpr BasicShortString &operator=(const char *const s) noexcept{
+    constexpr BasicShortString &operator=(const _CharT *const s) noexcept{
         buf[len - 1] = len - 1;
         auto outp = s;
         auto inp = std::begin(buf);
@@ -82,8 +85,8 @@ public:
     [[nodiscard]]inline constexpr auto crbegin()const noexcept{return std::crend(buf) - size();}
     [[nodiscard]]inline constexpr auto crend()const noexcept{return std::crend(buf);}
 
-    [[nodiscard]]inline constexpr operator char*() noexcept{return buf;}
-    [[nodiscard]]inline constexpr operator const char*()const noexcept{return buf;}
+    [[nodiscard]]inline constexpr operator _CharT*() noexcept{return buf;}
+    [[nodiscard]]inline constexpr operator const _CharT*()const noexcept{return buf;}
 
     //Returns a reference to the first element in the container.
     //Calling front on an empty container is undefined behaviour.
@@ -94,7 +97,7 @@ public:
     [[nodiscard]]inline constexpr auto back()const noexcept{return *std::prev(end());}
     [[nodiscard]]inline constexpr auto back() noexcept{return *std::prev(end());}
 
-    BasicShortString &operator+=(const char *const s) noexcept{
+    BasicShortString &operator+=(const _CharT *const s) noexcept{
         auto outp = s;
         auto inp = end();
         while(*outp != 0 && buf[len - 1]){
@@ -107,7 +110,7 @@ public:
         assert(inp < std::end(buf));
         return *this;
     };
-    BasicShortString &operator+=(const char c) noexcept{
+    BasicShortString &operator+=(const _CharT c) noexcept{
         auto inp = end();
         if(buf[len - 1]){
             *inp = c;
@@ -118,9 +121,9 @@ public:
         assert(inp < std::end(buf));
         return *this;
     };
-    inline void push_back(const char *const s) noexcept{operator+=(s);}
-    inline void push_back(const char c) noexcept{operator+=(c);}
-    inline BasicShortString &append(const char *const s) noexcept{return operator+=(s);}
+    inline void push_back(const _CharT *const s) noexcept{operator+=(s);}
+    inline void push_back(const _CharT c) noexcept{operator+=(c);}
+    inline BasicShortString &append(const _CharT *const s) noexcept{return operator+=(s);}
     [[nodiscard]]constexpr BasicShortString operator+(const BasicShortString &sr)const noexcept{
         if(full()){
             return *this;
@@ -138,27 +141,32 @@ public:
         }
     }
 private:
-    char buf[len];
+    _CharT buf[len];
 };
-template <int len>
-[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<len> &sl, const char *sr) noexcept{
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<len, _CharT, _Traits> &sl, const _CharT *sr) noexcept{
     auto leftIt = sl.cbegin();
     auto rightIt = sr;
     while((*leftIt != '\0') && (*rightIt != '\0')){
-        if(*leftIt != *rightIt){
+        if(!_Traits::eq(*leftIt, *rightIt)){
             return false;
         }
         ++leftIt;
         ++rightIt;
     }
-    return *rightIt == '\0' && *leftIt == '\0';
+    return (*rightIt == '\0') && (*leftIt == '\0');
 }
-template <int lenL, int lenR>
-[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
+template <int lenL, int lenR,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<lenL, _CharT, _Traits> &sl,
+                                               const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
     auto leftIt = sl.cbegin();
     auto rightIt = sr.cbegin();
     while((*leftIt != '\0') && (*rightIt != '\0')){
-        if(*leftIt != *rightIt){
+        if(!_Traits::eq(*leftIt, *rightIt)){
             return false;
         }
         ++leftIt;
@@ -166,9 +174,28 @@ template <int lenL, int lenR>
     }
     return *rightIt == '\0' && *leftIt == '\0';
 }
-template <int lenL, int lenR>
-[[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL> &sl, const BasicShortString<lenR> &sr) noexcept{
-    return std::strcmp(sl,  sr) == -1;
+template <int lenL, int lenR,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL, _CharT, _Traits> &sl,
+                                              const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+    auto leftIt = sl.cbegin();
+    auto rightIt = sr.cbegin();
+    while((*leftIt != '\0') && (*rightIt != '\0')){
+        if (_Traits::lt(*leftIt, *rightIt)){
+            return true;
+        }
+        if (_Traits::lt(*rightIt, *leftIt)){
+            return false;
+        }
+        ++leftIt;
+        ++rightIt;
+    }
+    if(*leftIt == '\0' && *rightIt != '\0'){
+        return true;
+    }
+
+    return false;
 }
 
 typedef BasicShortString<8> ShortString;
@@ -176,6 +203,7 @@ typedef BasicShortString<16> ShortString16;
 static_assert (std::is_trivially_copyable<ShortString>::value);
 static_assert (sizeof(ShortString) == 8);
 static_assert (sizeof(ShortString16) == 16);
+static_assert (sizeof(BasicShortString<8, wchar_t>) == 8 * sizeof(wchar_t));
 
 static_assert (ShortString{""}.empty());
 static_assert (!ShortString{"1"}.empty());
@@ -207,6 +235,16 @@ static_assert (ShortString{"1234"} == "1234",               "String comparizon s
 static_assert (ShortString{"1234"} == ShortString{"1234"},  "String comparizon should work");
 static_assert (ShortString{""} == "",                       "String comparizon should work");
 static_assert (ShortString{""} == ShortString{""},          "String comparizon should work");
+
+static_assert (ShortString{"1234"} < ShortString{"12345"},  "String comparizon with < should work");
+static_assert (ShortString{"1234"} < ShortString{"1235"},   "String comparizon with < should work");
+static_assert (ShortString{""} < ShortString{"1"},          "String comparizon with < should work");
+static_assert (ShortString{"a"} < ShortString{"b"},         "String comparizon with < should work");
+static_assert (!(ShortString{"12345"} < ShortString{"1234"}),  "String comparizon with < should work");
+static_assert (!(ShortString{"1235"} < ShortString{"1234"}),   "String comparizon with < should work");
+static_assert (!(ShortString{"1"} < ShortString{""}),          "String comparizon with < should work");
+static_assert (!(ShortString{"b"} < ShortString{"a"}),         "String comparizon with < should work");
+static_assert (!(ShortString{"b"} < ShortString{"b"}),         "String comparizon with < should work");
 
 static_assert (ShortString{"1234"} + ShortString{"567"} == "1234567", "String catenation should work");
 static_assert (ShortString{"1234"} + "567" == "1234567",    "String catenation should work");
