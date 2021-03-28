@@ -97,7 +97,7 @@ public:
     [[nodiscard]]inline constexpr auto back()const noexcept{return *std::prev(end());}
     [[nodiscard]]inline constexpr auto back() noexcept{return *std::prev(end());}
 
-    BasicShortString &operator+=(const _CharT *const s) noexcept{
+    constexpr BasicShortString &operator+=(const _CharT *const s) noexcept{
         auto outp = s;
         auto inp = end();
         while(*outp != 0 && buf[len - 1]){
@@ -110,7 +110,7 @@ public:
         assert(inp < std::end(buf));
         return *this;
     };
-    BasicShortString &operator+=(const _CharT c) noexcept{
+    constexpr BasicShortString &operator+=(const _CharT c) noexcept{
         auto inp = end();
         if(buf[len - 1]){
             *inp = c;
@@ -124,25 +124,25 @@ public:
     inline void push_back(const _CharT *const s) noexcept{operator+=(s);}
     inline void push_back(const _CharT c) noexcept{operator+=(c);}
     inline BasicShortString &append(const _CharT *const s) noexcept{return operator+=(s);}
-    [[nodiscard]]constexpr BasicShortString operator+(const BasicShortString &sr)const noexcept{
-        if(full()){
-            return *this;
-        }else{
-            BasicShortString ret(*this);
-            const auto addSize = std::min(freeSpace(), sr.size());
-            for(size_type i = 0; i < addSize; ++i){
-                ret.buf[size() + i] = sr.buf[i];
-            }
-            const auto newSize = size() + addSize;
-            assert(newSize < len);
-            ret.buf[newSize] = '\0';
-            ret.buf[len - 1] = capacity() - newSize;
-            return ret;
-        }
-    }
 private:
     _CharT buf[len];
 };
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]constexpr const BasicShortString<len, _CharT, _Traits> operator+(const BasicShortString<len, _CharT, _Traits> &sl, const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
+    BasicShortString<len, _CharT, _Traits> temp(sl);
+    temp+= sr;
+    return temp;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]constexpr const BasicShortString<len, _CharT, _Traits> operator+(const BasicShortString<len, _CharT, _Traits> &sl, const _CharT *const sr) noexcept{
+    BasicShortString<len, _CharT, _Traits> temp(sl);
+    temp+= sr;
+    return temp;
+}
 template <int len,
           typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
