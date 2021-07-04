@@ -324,9 +324,10 @@ void ShortStringTest::stdCopyableReverse()
 
 void ShortStringTest::stdSwapable()
 {
+    using std::swap;
     ShortString s1{"Hello"};
     ShortString s2{"World"};
-    std::swap(s1, s2);
+    swap(s1, s2);
     QCOMPARE(QString("Hello"), QString(s2));
     QCOMPARE(QString("World"), QString(s1));
 }
