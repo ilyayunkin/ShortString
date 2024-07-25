@@ -127,11 +127,13 @@ public:
 private:
     _CharT buf[len];
 };
-template <int len,
+
+template <int lenL,
+          int lenR,
           typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
-[[nodiscard]]constexpr const BasicShortString<len, _CharT, _Traits> operator+(const BasicShortString<len, _CharT, _Traits> &sl, const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
-    BasicShortString<len, _CharT, _Traits> temp(sl);
+[[nodiscard]]constexpr const BasicShortString<lenL, _CharT, _Traits> operator+(const BasicShortString<lenL, _CharT, _Traits> &sl, const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+    BasicShortString<lenL, _CharT, _Traits> temp(sl);
     temp+= sr;
     return temp;
 }
@@ -236,6 +238,8 @@ static_assert (ShortString{"1234"} == ShortString{"1234"},  "String comparizon s
 static_assert (ShortString{""} == "",                       "String comparizon should work");
 static_assert (ShortString{""} == ShortString{""},          "String comparizon should work");
 
+static_assert (ShortString{"1234567"} == ShortString16{"1234567"}, "String comparizon between types should work");
+
 static_assert (ShortString{"1234"} < ShortString{"12345"},  "String comparizon with < should work");
 static_assert (ShortString{"1234"} < ShortString{"1235"},   "String comparizon with < should work");
 static_assert (ShortString{""} < ShortString{"1"},          "String comparizon with < should work");
@@ -249,6 +253,8 @@ static_assert (!(ShortString{"b"} < ShortString{"b"}),         "String comparizo
 static_assert (ShortString{"1234"} + ShortString{"567"} == "1234567", "String catenation should work");
 static_assert (ShortString{"1234"} + "567" == "1234567",    "String catenation should work");
 static_assert (ShortString{} + "1234567" == "1234567",      "String catenation should work");
+
+static_assert (ShortString{"1234"} + ShortString16{"567"} == "1234567", "String catenation between types should work");
 
 static_assert (ShortString{} + "12345678901" == "1234567",  "Strings should be cut to fit the internal buf");
 static_assert (ShortString{"12345678901"} == "1234567",     "Strings should be cut to fit the internal buf");
