@@ -32,35 +32,23 @@ public:
         buf[len - 1] = len - 1;
     }
     constexpr BasicShortString(const _CharT *const s) noexcept : buf{'\0'}{
-        buf[len - 1] = len - 1;
-        auto outp = s;
-        auto inp = std::begin(buf);
-        while(*outp != 0 && buf[len - 1]){
-            *inp = *outp;
-            ++inp;
-            ++outp;
-            --(buf[len - 1]);
-            assert(inp < std::end(buf));
-        }
-        *inp = '\0';
+        init(s);
     };
     constexpr BasicShortString(const BasicShortString &) = default;
     constexpr BasicShortString(BasicShortString &&) = default;
     constexpr BasicShortString &operator=(const BasicShortString &) = default;
     constexpr BasicShortString &operator=(BasicShortString &&) = default;
     constexpr BasicShortString &operator=(const _CharT *const s) noexcept{
-        buf[len - 1] = len - 1;
-        auto outp = s;
-        auto inp = std::begin(buf);
-        while(*outp != 0 && buf[len - 1]){
-            *inp = *outp;
-            ++inp;
-            ++outp;
-            --(buf[len - 1]);
-        }
-        *inp = '\0';
-        assert(inp < std::end(buf));
+        init(s);
         return *this;
+    };
+    constexpr void init(const _CharT *const s) noexcept{
+        clear();
+        operator+=(s);
+    };
+    constexpr void clear() noexcept{
+        buf[0] = '\0';
+        buf[len - 1] = len - 1;;
     };
     [[nodiscard]]inline constexpr size_type capacity()const noexcept{return len - 1;}
     [[nodiscard]]inline constexpr size_type size()const noexcept{return capacity() - freeSpace();}
@@ -85,8 +73,8 @@ public:
     [[nodiscard]]inline constexpr auto crbegin()const noexcept{return std::crend(buf) - size();}
     [[nodiscard]]inline constexpr auto crend()const noexcept{return std::crend(buf);}
 
-    [[nodiscard]]inline constexpr operator _CharT*() noexcept{return buf;}
-    [[nodiscard]]inline constexpr operator const _CharT*()const noexcept{return buf;}
+    [[nodiscard]]inline constexpr _CharT* c_str() noexcept{return buf;}
+    [[nodiscard]]inline constexpr const _CharT* c_str()const noexcept{return buf;}
 
     //Returns a reference to the first element in the container.
     //Calling front on an empty container is undefined behaviour.
@@ -121,6 +109,14 @@ public:
         assert(inp < std::end(buf));
         return *this;
     };
+    template <int lenR>
+    constexpr BasicShortString &operator+=(const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+        return operator+=(sr.c_str());
+    }
+
+    [[nodiscard]] constexpr _CharT& operator[](std::size_t i) noexcept{return buf[i];}
+    [[nodiscard]] constexpr const _CharT& operator[](std::size_t i) const noexcept{return buf[i];}
+
     inline void push_back(const _CharT *const s) noexcept{operator+=(s);}
     inline void push_back(const _CharT c) noexcept{operator+=(c);}
     inline BasicShortString &append(const _CharT *const s) noexcept{return operator+=(s);}
@@ -165,24 +161,22 @@ template <int lenL, int lenR,
           typename _Traits = std::char_traits<_CharT>>
 [[nodiscard]]inline constexpr bool operator ==(const BasicShortString<lenL, _CharT, _Traits> &sl,
                                                const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
-    auto leftIt = sl.cbegin();
-    auto rightIt = sr.cbegin();
-    while((*leftIt != '\0') && (*rightIt != '\0')){
-        if(!_Traits::eq(*leftIt, *rightIt)){
-            return false;
-        }
-        ++leftIt;
-        ++rightIt;
-    }
-    return *rightIt == '\0' && *leftIt == '\0';
+    return operator==(sl, sr.c_str());
 }
 template <int lenL, int lenR,
           typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator !=(const BasicShortString<lenL, _CharT, _Traits> &sl,
+                                               const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+    return !operator==(sl, sr.c_str());
+}
+template <int lenL,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
 [[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL, _CharT, _Traits> &sl,
-                                              const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+                                              const _CharT *sr) noexcept{
     auto leftIt = sl.cbegin();
-    auto rightIt = sr.cbegin();
+    auto rightIt = sr;
     while((*leftIt != '\0') && (*rightIt != '\0')){
         if (_Traits::lt(*leftIt, *rightIt)){
             return true;
@@ -198,6 +192,13 @@ template <int lenL, int lenR,
     }
 
     return false;
+}
+template <int lenL, int lenR,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL, _CharT, _Traits> &sl,
+                                              const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+    return operator < (sl, sr.c_str());
 }
 
 typedef BasicShortString<8> ShortString;
@@ -240,6 +241,7 @@ static_assert (ShortString{""} == ShortString{""},          "String comparizon s
 
 static_assert (ShortString{"1234567"} == ShortString16{"1234567"}, "String comparizon between types should work");
 
+static_assert (ShortString{"1234"} < "12345",               "String comparizon with < should work");
 static_assert (ShortString{"1234"} < ShortString{"12345"},  "String comparizon with < should work");
 static_assert (ShortString{"1234"} < ShortString{"1235"},   "String comparizon with < should work");
 static_assert (ShortString{""} < ShortString{"1"},          "String comparizon with < should work");

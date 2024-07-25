@@ -33,6 +33,7 @@ private slots:
     void canBeModifiedByIndex();
     void providesApplyableIteratorTypes();
     void providesApplyableConstIteratorTypes();
+    void canBeCleared();
 };
 
 ShortStringTest::ShortStringTest()
@@ -49,14 +50,14 @@ void ShortStringTest::ctorGets1Byte()
 {
     constexpr auto c = "1";
     constexpr ShortString s{"1"};
-    QCOMPARE(QString(s), QString(c));
+    QCOMPARE(QString(s.c_str()), QString(c));
 }
 
 void ShortStringTest::ctorFits7Bytes()
 {
     constexpr auto c = "1234567";
     constexpr ShortString s{"1234567"};
-    QCOMPARE(QString(s), QString(c));
+    QCOMPARE(QString(s.c_str()), QString(c));
 }
 
 void ShortStringTest::assignCuts8Byte()
@@ -64,7 +65,7 @@ void ShortStringTest::assignCuts8Byte()
     constexpr auto c = "1234567";
     ShortString s{"1"};
     s = "12345678";
-    QCOMPARE(QString(s), QString(c));
+    QCOMPARE(QString(s.c_str()), QString(c));
 }
 
 void ShortStringTest::assignable()
@@ -72,24 +73,24 @@ void ShortStringTest::assignable()
     {
         ShortString s;
         s = "1234567";
-        QCOMPARE(QString(s), QString("1234567"));
+        QCOMPARE(QString(s.c_str()), QString("1234567"));
     }
     {
         ShortString16 s;
         s = "1234567ABCDEFG";
-        QCOMPARE(QString(s), QString("1234567ABCDEFG"));
+        QCOMPARE(QString(s.c_str()), QString("1234567ABCDEFG"));
     }
     {
         ShortString s;
         ShortString s2("1234567");
         s = s2;
-        QCOMPARE(QString(s), QString("1234567"));
+        QCOMPARE(QString(s.c_str()), QString("1234567"));
     }
     {
         ShortString16 s;
         ShortString s2("1234567");
-        s = s2;
-        QCOMPARE(QString(s), QString("1234567"));
+        s = s2.c_str();
+        QCOMPARE(QString(s.c_str()), QString("1234567"));
     }
 }
 
@@ -134,7 +135,7 @@ void ShortStringTest::addition()
     ShortString s1(left.data());
     ShortString s2(right.data());
     auto s12 = s1 + s2;
-    QCOMPARE(QString(s12), QString(expected.data()));
+    QCOMPARE(QString(s12.c_str()), QString(expected.data()));
 }
 
 void ShortStringTest::additionConstexpr()
@@ -144,7 +145,7 @@ void ShortStringTest::additionConstexpr()
     constexpr ShortString s2("45");
     constexpr auto s12 = s1 + s2;
     QCOMPARE(s12.size(), strlen(etalon));
-    QCOMPARE(QString(s12), etalon);
+    QCOMPARE(QString(s12.c_str()), etalon);
 }
 
 void ShortStringTest::appendsWithPlusEqual()
@@ -154,26 +155,26 @@ void ShortStringTest::appendsWithPlusEqual()
         {
             ShortString s;
             s+= "12345678";
-            QCOMPARE(QString(s), QString(c));
+            QCOMPARE(QString(s.c_str()), QString(c));
         }
         {
             ShortString s{"1"};
             s += "2345678";
-            QCOMPARE(QString(s), QString(c));
+            QCOMPARE(QString(s.c_str()), QString(c));
         }
     }
     {
         constexpr auto c = "12345678";
         ShortString16 s{"1"};
         s += "2345678";
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
     {
         constexpr auto c = "1234567ABCDEFG";
         ShortString16 s;
         s+= "1234567";
         s+= "ABCDEFG";
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
 }
 
@@ -183,22 +184,22 @@ void ShortStringTest::appendsWithPushBack()
     {
         ShortString s;
         s.push_back("1234567");
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
     {
         ShortString s{"1"};
         s.push_back("234567");
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
     {
         ShortString s("123456");
         s.push_back('7');
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
     {
         ShortString s;
         s.push_back('1');
-        QCOMPARE(QString(s), QString("1"));
+        QCOMPARE(QString(s.c_str()), QString("1"));
     }
 }
 
@@ -208,17 +209,17 @@ void ShortStringTest::pushBackCutsExcessiveData()
     {
         ShortString s;
         s.push_back("123456789");
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
     {
         ShortString s("12345");
         s.push_back("6789");
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
     {
         ShortString s("1234567");
         s.push_back('8');
-        QCOMPARE(QString(s), QString(c));
+        QCOMPARE(QString(s.c_str()), QString(c));
     }
 }
 
@@ -242,7 +243,7 @@ void ShortStringTest::comparable()
     {
         constexpr auto c = "1234567";
         constexpr ShortString s{"123456"};
-        QVERIFY(s != c);
+        QVERIFY(s.c_str() != c);
     }
     {
         constexpr ShortString s = "1234567";
@@ -260,7 +261,7 @@ void ShortStringTest::castableToStdString()
 {
     constexpr auto c = "1234567";
     constexpr ShortString s{"1234567"};
-    std::string stdS(s);
+    std::string stdS(s.c_str());
     QCOMPARE(stdS, c);
 }
 
@@ -328,8 +329,8 @@ void ShortStringTest::stdSwapable()
     ShortString s1{"Hello"};
     ShortString s2{"World"};
     swap(s1, s2);
-    QCOMPARE(QString("Hello"), QString(s2));
-    QCOMPARE(QString("World"), QString(s1));
+    QCOMPARE(QString("Hello"), QString(s2.c_str()));
+    QCOMPARE(QString("World"), QString(s1.c_str()));
 }
 
 void ShortStringTest::canBeReadByIndex()
@@ -360,7 +361,7 @@ void ShortStringTest::canBeModifiedByIndex()
 
     std::reverse(std::begin(string), std::end(string));
 
-    QCOMPARE(QString(string.data()), QString(s));
+    QCOMPARE(QString(string.data()), QString(s.c_str()));
 }
 
 void ShortStringTest::providesApplyableIteratorTypes()
@@ -378,7 +379,7 @@ void ShortStringTest::providesApplyableIteratorTypes()
 
         std::reverse(std::begin(string), std::end(string));
 
-        QCOMPARE(QString(string.data()), QString(s));
+        QCOMPARE(QString(string.data()), QString(s.c_str()));
     }
     {
         std::string string = "1234567";
@@ -393,7 +394,7 @@ void ShortStringTest::providesApplyableIteratorTypes()
 
         std::reverse(std::begin(string), std::end(string));
 
-        QCOMPARE(QString(string.data()), QString(s));
+        QCOMPARE(QString(string.data()), QString(s.c_str()));
     }
 }
 
@@ -408,6 +409,14 @@ void ShortStringTest::providesApplyableConstIteratorTypes()
             --i;
         }
     }
+}
+
+void ShortStringTest::canBeCleared()
+{
+    ShortString s = "7654321";
+    s.clear();
+    QVERIFY(s.empty());
+    QCOMPARE(QString(s.c_str()), QString());
 }
 
 QTEST_APPLESS_MAIN(ShortStringTest)
