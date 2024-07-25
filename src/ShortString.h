@@ -29,7 +29,7 @@ public:
     static_assert (std::numeric_limits<value_type>::is_integer, "value_type must be integer");
 
     constexpr BasicShortString() noexcept : buf{'\0'}{
-        buf[len - 1] = len - 1;
+        _Traits::assign(buf[len - 1], len - 1);
     }
     constexpr BasicShortString(const _CharT *const s) noexcept : buf{'\0'}{
         init(s);
@@ -47,8 +47,8 @@ public:
         operator+=(s);
     };
     constexpr void clear() noexcept{
-        buf[0] = '\0';
-        buf[len - 1] = len - 1;;
+        _Traits::assign(buf[0], '\0');
+        _Traits::assign(buf[len - 1], len - 1);
     };
     [[nodiscard]]inline constexpr size_type capacity()const noexcept{return len - 1;}
     [[nodiscard]]inline constexpr size_type size()const noexcept{return capacity() - freeSpace();}
@@ -88,20 +88,20 @@ public:
     constexpr BasicShortString &operator+=(const _CharT *const s) noexcept{
         auto outp = s;
         auto inp = end();
-        while(*outp != 0 && buf[len - 1]){
-            *inp = *outp;
+        while(!_Traits::eq(*outp, '\0') && buf[len - 1]){
+            _Traits::assign(*inp, *outp);
             ++inp;
             ++outp;
             --(buf[len - 1]);
         }
-        *inp = '\0';
+        _Traits::assign(*inp, '\0');
         assert(inp < std::end(buf));
         return *this;
     };
     constexpr BasicShortString &operator+=(const _CharT c) noexcept{
         auto inp = end();
-        if(buf[len - 1]){
-            *inp = c;
+        if(!_Traits::eq(buf[len - 1], '\0')){
+            _Traits::assign(*inp, c);
             ++inp;
             --(buf[len - 1]);
         }
@@ -141,64 +141,154 @@ template <int len,
     temp+= sr;
     return temp;
 }
-template <int len,
-          typename _CharT = char,
+template <typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
-[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<len, _CharT, _Traits> &sl, const _CharT *sr) noexcept{
-    auto leftIt = sl.cbegin();
+[[nodiscard]]inline constexpr int sscmp(const _CharT *sl, const _CharT *sr) noexcept{
+    auto leftIt = sl;
     auto rightIt = sr;
-    while((*leftIt != '\0') && (*rightIt != '\0')){
-        if(!_Traits::eq(*leftIt, *rightIt)){
-            return false;
-        }
+    while(!_Traits::eq(*leftIt, '\0') && !_Traits::eq(*rightIt, '\0') && _Traits::eq(*leftIt, *rightIt)){
         ++leftIt;
         ++rightIt;
     }
-    return (*rightIt == '\0') && (*leftIt == '\0');
+    if (_Traits::eq(*rightIt, '\0') && _Traits::eq(*leftIt, '\0'))
+        return 0;
+    if(_Traits::eq(*leftIt, '\0') || _Traits::lt(*leftIt, *rightIt))
+        return -1;
+    return 1;
 }
+
 template <int lenL, int lenR,
           typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
 [[nodiscard]]inline constexpr bool operator ==(const BasicShortString<lenL, _CharT, _Traits> &sl,
                                                const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
-    return operator==(sl, sr.c_str());
+    return sscmp(sl.c_str(), sr.c_str()) == 0;
 }
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator ==(const BasicShortString<len, _CharT, _Traits> &sl,
+                                               const _CharT *sr) noexcept{
+    return sscmp(sl.c_str(), sr) == 0;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator ==(const _CharT *sl,
+                                               const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl, sr.c_str()) == 0;
+}
+
 template <int lenL, int lenR,
           typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
 [[nodiscard]]inline constexpr bool operator !=(const BasicShortString<lenL, _CharT, _Traits> &sl,
                                                const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
-    return !operator==(sl, sr.c_str());
+    return !operator==(sl, sr);
 }
-template <int lenL,
+template <int len,
           typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
-[[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL, _CharT, _Traits> &sl,
-                                              const _CharT *sr) noexcept{
-    auto leftIt = sl.cbegin();
-    auto rightIt = sr;
-    while((*leftIt != '\0') && (*rightIt != '\0')){
-        if (_Traits::lt(*leftIt, *rightIt)){
-            return true;
-        }
-        if (_Traits::lt(*rightIt, *leftIt)){
-            return false;
-        }
-        ++leftIt;
-        ++rightIt;
-    }
-    if(*leftIt == '\0' && *rightIt != '\0'){
-        return true;
-    }
+[[nodiscard]]inline constexpr bool operator !=(const BasicShortString<len, _CharT, _Traits> &sl,
+                                               const _CharT *sr) noexcept{
+    return !operator==(sl, sr);
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator !=(const _CharT *sl,
+                                               const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
+    return !operator==(sl, sr);
+}
 
-    return false;
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator <(const BasicShortString<len, _CharT, _Traits> &sl,
+                                              const _CharT *sr) noexcept{
+
+    return sscmp(sl.c_str(), sr) == -1;
 }
 template <int lenL, int lenR,
           typename _CharT = char,
           typename _Traits = std::char_traits<_CharT>>
 [[nodiscard]]inline constexpr bool operator <(const BasicShortString<lenL, _CharT, _Traits> &sl,
                                               const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
-    return operator < (sl, sr.c_str());
+    return sscmp(sl.c_str(), sr.c_str()) == -1;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator <(const _CharT *sl,
+                                              const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl, sr.c_str()) == -1;
+}
+
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator >(const BasicShortString<len, _CharT, _Traits> &sl,
+                                              const _CharT *sr) noexcept{
+
+    return sscmp(sl.c_str(), sr) == 1;
+}
+template <int lenL, int lenR,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator >(const BasicShortString<lenL, _CharT, _Traits> &sl,
+                                              const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl.c_str(), sr.c_str()) == 1;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator >(const _CharT *sl,
+                                              const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl, sr.c_str()) == 1;
+}
+
+template <int lenL, int lenR,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator <=(const BasicShortString<lenL, _CharT, _Traits> &sl,
+                                               const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl.c_str(), sr.c_str()) != 1;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator <=(const BasicShortString<len, _CharT, _Traits> &sl,
+                                               const _CharT *sr) noexcept{
+    return sscmp(sl.c_str(), sr) != 1;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator <=(const _CharT *sl,
+                                               const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl, sr.c_str()) != 1;
+}
+
+template <int lenL, int lenR,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator >=(const BasicShortString<lenL, _CharT, _Traits> &sl,
+                                               const BasicShortString<lenR, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl.c_str(), sr.c_str()) != -1;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator >=(const BasicShortString<len, _CharT, _Traits> &sl,
+                                               const _CharT *sr) noexcept{
+    return sscmp(sl.c_str(), sr) != -1;
+}
+template <int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+[[nodiscard]]inline constexpr bool operator >=(const _CharT *sl,
+                                               const BasicShortString<len, _CharT, _Traits> &sr) noexcept{
+    return sscmp(sl, sr.c_str()) != -1;
 }
 
 typedef BasicShortString<8> ShortString;
@@ -213,49 +303,108 @@ static_assert (!ShortString{"1"}.empty());
 static_assert (!ShortString{"123456"}.full());
 
 static_assert (ShortString{"1234567"}.full());
-static_assert ([]{constexpr ShortString s; return s.freeSpace() == s.capacity();}());
-static_assert ([]{constexpr ShortString s; return s.freeSpace() == static_cast<ShortString::size_type>(7);}());
-static_assert ([]{constexpr ShortString s{"1"}; return s.freeSpace() == static_cast<ShortString::size_type>(6);}());
-static_assert ([]{constexpr ShortString s{"123456"}; return s.freeSpace() == static_cast<ShortString::size_type>(1);}());
+static_assert ([]{constexpr ShortString s;            return s.freeSpace() == s.capacity();}());
+static_assert ([]{constexpr ShortString s;            return s.freeSpace() == static_cast<ShortString::size_type>(7);}());
+static_assert ([]{constexpr ShortString s{"1"};       return s.freeSpace() == static_cast<ShortString::size_type>(6);}());
+static_assert ([]{constexpr ShortString s{"123456"};  return s.freeSpace() == static_cast<ShortString::size_type>(1);}());
 static_assert ([]{constexpr ShortString s{"1234567"}; return s.freeSpace() == static_cast<ShortString::size_type>(0);}());
 
-static_assert (ShortString{"1234567"}.size() == static_cast<ShortString::size_type>(7));
+static_assert (ShortString{"1234567"}.size()   == static_cast<ShortString::size_type>(7));
 static_assert (ShortString{"1234567"}.length() == static_cast<ShortString::size_type>(7));
-static_assert (ShortString{"123"}.size() == static_cast<ShortString::size_type>(3));
-static_assert (ShortString{"123"}.length() == static_cast<ShortString::size_type>(3));
-static_assert (ShortString{""}.size() == static_cast<ShortString::size_type>(0));
-static_assert (ShortString{""}.length() == static_cast<ShortString::size_type>(0));
-static_assert (ShortString{}.size() == static_cast<ShortString::size_type>(0));
-static_assert (ShortString{}.length() == static_cast<ShortString::size_type>(0));
-static_assert ([]{constexpr ShortString s{"1234567"}; return s.back() == '7';}());
-static_assert ([]{constexpr ShortString s{"1234"}; return s.back() == '4';}());
-static_assert ([]{constexpr ShortString s{"1234567"}; return s.front() == '1';}());
-static_assert ([]{constexpr ShortString s{"1234"}; return s.front() == '1';}());
+static_assert (ShortString{"123"}.size()       == static_cast<ShortString::size_type>(3));
+static_assert (ShortString{"123"}.length()     == static_cast<ShortString::size_type>(3));
+static_assert (ShortString{""}.size()          == static_cast<ShortString::size_type>(0));
+static_assert (ShortString{""}.length()        == static_cast<ShortString::size_type>(0));
+static_assert (ShortString{}.size()            == static_cast<ShortString::size_type>(0));
+static_assert (ShortString{}.length()          == static_cast<ShortString::size_type>(0));
 
-static_assert (ShortString{"1234567"} == "1234567",         "String comparizon should work");
-static_assert (ShortString{"1234567"} == ShortString{"1234567"}, "String comparizon should work");
-static_assert (ShortString{"1234"} == "1234",               "String comparizon should work");
-static_assert (ShortString{"1234"} == ShortString{"1234"},  "String comparizon should work");
-static_assert (ShortString{""} == "",                       "String comparizon should work");
-static_assert (ShortString{""} == ShortString{""},          "String comparizon should work");
+static_assert ([]{constexpr ShortString s{"1234567"}; return s.back() == '7';}());
+static_assert ([]{constexpr ShortString s{"1234"};    return s.back() == '4';}());
+static_assert ([]{constexpr ShortString s{"1234567"}; return s.front() == '1';}());
+static_assert ([]{constexpr ShortString s{"1234"};    return s.front() == '1';}());
+
+static_assert (ShortString{"1234567"}   == "1234567",               "String comparizon should work");
+static_assert (ShortString{"1234567"}   == ShortString{"1234567"},  "String comparizon should work");
+static_assert (ShortString{"1234"}      == "1234",                  "String comparizon should work");
+static_assert (ShortString{"1234"}      == ShortString{"1234"},     "String comparizon should work");
+static_assert (ShortString{""}          == "",                      "String comparizon should work");
+static_assert (ShortString{""}          == ShortString{""},         "String comparizon should work");
+
+static_assert (ShortString{"1234567"}   != "123456",                "String comparizon should work");
+static_assert (ShortString{"1234567"}   != ShortString{"123456"},   "String comparizon should work");
+static_assert (ShortString{"1234"}      != "123",                   "String comparizon should work");
+static_assert (ShortString{"1234"}      != ShortString{"123"},      "String comparizon should work");
+static_assert (ShortString{""}          != "1",                     "String comparizon should work");
+static_assert (ShortString{""}          != ShortString{"1"},        "String comparizon should work");
+
+static_assert (!(ShortString{"1234567"} == "123456"),               "String comparizon should work");
+static_assert (!(ShortString{"1234567"} == ShortString{"123456"}),  "String comparizon should work");
+static_assert (!(ShortString{"1234"}    == "123"),                  "String comparizon should work");
+static_assert (!(ShortString{"1234"}    == ShortString{"123"}),     "String comparizon should work");
+static_assert (!(ShortString{""}        == "1"),                    "String comparizon should work");
+static_assert (!(ShortString{""}        == ShortString{"1"}),       "String comparizon should work");
+
+static_assert (!(ShortString{"1234567"} != "1234567"),              "String comparizon should work");
+static_assert (!(ShortString{"1234567"} != ShortString{"1234567"}), "String comparizon should work");
+static_assert (!(ShortString{"1234"}    != "1234"),                 "String comparizon should work");
+static_assert (!(ShortString{"1234"}    != ShortString{"1234"}),    "String comparizon should work");
+static_assert (!(ShortString{""}        != ""),                     "String comparizon should work");
+static_assert (!(ShortString{""}        != ShortString{""}),        "String comparizon should work");
+
+static_assert ("1234567"   == ShortString{"1234567"}, "String comparizon in reverse order should work");
+static_assert (!("1234567" == ShortString{"123456"}), "String comparizon in reverse order should work");
 
 static_assert (ShortString{"1234567"} == ShortString16{"1234567"}, "String comparizon between types should work");
 
-static_assert (ShortString{"1234"} < "12345",               "String comparizon with < should work");
-static_assert (ShortString{"1234"} < ShortString{"12345"},  "String comparizon with < should work");
-static_assert (ShortString{"1234"} < ShortString{"1235"},   "String comparizon with < should work");
-static_assert (ShortString{""} < ShortString{"1"},          "String comparizon with < should work");
-static_assert (ShortString{"a"} < ShortString{"b"},         "String comparizon with < should work");
+static_assert (ShortString{"1234"}    < "12345",               "String comparizon with < should work");
+static_assert (ShortString{"1234"}    < ShortString{"12345"},  "String comparizon with < should work");
+static_assert (ShortString{"1234"}    < ShortString{"1235"},   "String comparizon with < should work");
+static_assert (ShortString{""}        < ShortString{"1"},      "String comparizon with < should work");
+static_assert (ShortString{"a"}       < ShortString{"b"},      "String comparizon with < should work");
 static_assert (!(ShortString{"12345"} < ShortString{"1234"}),  "String comparizon with < should work");
-static_assert (!(ShortString{"1235"} < ShortString{"1234"}),   "String comparizon with < should work");
-static_assert (!(ShortString{"1"} < ShortString{""}),          "String comparizon with < should work");
-static_assert (!(ShortString{"b"} < ShortString{"a"}),         "String comparizon with < should work");
-static_assert (!(ShortString{"b"} < ShortString{"b"}),         "String comparizon with < should work");
+static_assert (!(ShortString{"1235"}  < ShortString{"1234"}),  "String comparizon with < should work");
+static_assert (!(ShortString{"1"}     < ShortString{""}),      "String comparizon with < should work");
+static_assert (!(ShortString{"b"}     < ShortString{"a"}),     "String comparizon with < should work");
+static_assert (!(ShortString{"b"}     < ShortString{"b"}),     "String comparizon with < should work");
+static_assert ("1234"                 < ShortString{"12345"},  "String comparizon with < should work");
 
-static_assert (ShortString{"1234"} + ShortString{"567"} == "1234567", "String catenation should work");
-static_assert (ShortString{"1234"} + "567" == "1234567",    "String catenation should work");
-static_assert (ShortString{} + "1234567" == "1234567",      "String catenation should work");
+static_assert (!(ShortString{"1234"}  > "12345"),              "String comparizon with < should work");
+static_assert (!(ShortString{"1234"}  > ShortString{"12345"}), "String comparizon with < should work");
+static_assert (!(ShortString{"1234"}  > ShortString{"1235"}),  "String comparizon with < should work");
+static_assert (!(ShortString{""}      > ShortString{"1"}),     "String comparizon with < should work");
+static_assert (!(ShortString{"a"}     > ShortString{"b"}),     "String comparizon with < should work");
+static_assert (ShortString{"12345"}   > ShortString{"1234"},   "String comparizon with < should work");
+static_assert (ShortString{"1235"}    > ShortString{"1234"},   "String comparizon with < should work");
+static_assert (ShortString{"1"}       > ShortString{""},       "String comparizon with < should work");
+static_assert (ShortString{"b"}       > ShortString{"a"},      "String comparizon with < should work");
+static_assert (!(ShortString{"b"}     > ShortString{"b"}),     "String comparizon with < should work");
 
+static_assert (ShortString{"1234567"}   <= "1234567",               "String comparizon should work");
+static_assert (ShortString{"1234567"}   <= ShortString{"1234567"},  "String comparizon should work");
+static_assert (ShortString{"1234"}      <= "1234",                  "String comparizon should work");
+static_assert (ShortString{"1234"}      <= ShortString{"1234"},     "String comparizon should work");
+static_assert (ShortString{""}          <= "",                      "String comparizon should work");
+static_assert (ShortString{""}          <= ShortString{""},         "String comparizon should work");
+static_assert (ShortString{"1234"}      <= "12345",                 "String comparizon with < should work");
+static_assert (ShortString{"1234"}      <= ShortString{"12345"},    "String comparizon with < should work");
+static_assert (ShortString{"1234"}      <= ShortString{"1235"},     "String comparizon with < should work");
+static_assert (ShortString{""}          <= ShortString{"1"},        "String comparizon with < should work");
+static_assert (ShortString{"a"}         <= ShortString{"b"},        "String comparizon with < should work");
+
+static_assert (ShortString{"1234567"}   >= "1234567",               "String comparizon should work");
+static_assert (ShortString{"1234567"}   >= ShortString{"1234567"},  "String comparizon should work");
+static_assert (ShortString{"1234"}      >= "1234",                  "String comparizon should work");
+static_assert (ShortString{"1234"}      >= ShortString{"1234"},     "String comparizon should work");
+static_assert (ShortString{""}          >= "",                      "String comparizon should work");
+static_assert (ShortString{""}          >= ShortString{""},         "String comparizon should work");
+static_assert (ShortString{"12345"}     >= ShortString{"1234"},     "String comparizon with < should work");
+static_assert (ShortString{"1235"}      >= ShortString{"1234"},     "String comparizon with < should work");
+static_assert (ShortString{"1"}         >= ShortString{""},         "String comparizon with < should work");
+static_assert (ShortString{"b"}         >= ShortString{"a"},        "String comparizon with < should work");
+
+static_assert (ShortString{"1234"} + ShortString{"567"}   == "1234567", "String catenation should work");
+static_assert (ShortString{"1234"} + "567"                == "1234567", "String catenation should work");
+static_assert (ShortString{}       + "1234567"            == "1234567", "String catenation should work");
 static_assert (ShortString{"1234"} + ShortString16{"567"} == "1234567", "String catenation between types should work");
 
 static_assert (ShortString{} + "12345678901" == "1234567",  "Strings should be cut to fit the internal buf");
