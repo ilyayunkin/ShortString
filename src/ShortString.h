@@ -407,6 +407,11 @@ static_assert (ShortString{"1234"} + "567"                == "1234567", "String 
 static_assert (ShortString{}       + "1234567"            == "1234567", "String catenation should work");
 static_assert (ShortString{"1234"} + ShortString16{"567"} == "1234567", "String catenation between types should work");
 
+static_assert ([]{ShortString s{"1234"}; s+= ShortString{"567"}  ; return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s+= "567"               ; return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{}      ; s+= "1234567"           ; return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s+= ShortString16{"567"}; return s == "1234567";}(), "String catenation between types should work");
+
 static_assert (ShortString{} + "12345678901" == "1234567",  "Strings should be cut to fit the internal buf");
 static_assert (ShortString{"12345678901"} == "1234567",     "Strings should be cut to fit the internal buf");
 
