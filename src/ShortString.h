@@ -117,9 +117,12 @@ public:
     [[nodiscard]] constexpr _CharT& operator[](std::size_t i) noexcept{return buf[i];}
     [[nodiscard]] constexpr const _CharT& operator[](std::size_t i) const noexcept{return buf[i];}
 
-    inline void push_back(const _CharT *const s) noexcept{operator+=(s);}
-    inline void push_back(const _CharT c) noexcept{operator+=(c);}
-    inline BasicShortString &append(const _CharT *const s) noexcept{return operator+=(s);}
+    constexpr inline void push_back(const _CharT *const s) noexcept{operator+=(s);}
+    constexpr inline void push_back(const _CharT c) noexcept{operator+=(c);}
+    constexpr inline BasicShortString &append(const _CharT *const s) noexcept{return operator+=(s);}
+    constexpr inline BasicShortString &append(const _CharT c) noexcept{return operator+=(c);}
+    template <int lenR>
+    constexpr inline BasicShortString &append(const BasicShortString<lenR, _CharT, _Traits> &s) noexcept{return operator+=(s.c_str());}
 private:
     _CharT buf[len];
 };
@@ -407,10 +410,16 @@ static_assert (ShortString{"1234"} + "567"                == "1234567", "String 
 static_assert (ShortString{}       + "1234567"            == "1234567", "String catenation should work");
 static_assert (ShortString{"1234"} + ShortString16{"567"} == "1234567", "String catenation between types should work");
 
-static_assert ([]{ShortString s{"1234"}; s+= ShortString{"567"}  ; return s == "1234567";}(), "String catenation should work");
-static_assert ([]{ShortString s{"1234"}; s+= "567"               ; return s == "1234567";}(), "String catenation should work");
-static_assert ([]{ShortString s{}      ; s+= "1234567"           ; return s == "1234567";}(), "String catenation should work");
-static_assert ([]{ShortString s{"1234"}; s+= ShortString16{"567"}; return s == "1234567";}(), "String catenation between types should work");
+static_assert ([]{ShortString s{"1234"}; s+= ShortString{"567"}        ; return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s+= "567"                     ; return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{}      ; s+= "1234567"                 ; return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s+= '5'                       ; return s == "12345"  ;}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s+= ShortString16{"567"}      ; return s == "1234567";}(), "String catenation between types should work");
+static_assert ([]{ShortString s{"1234"}; s.append(ShortString{"567"}  ); return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s.append("567"               ); return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{}      ; s.append("1234567"           ); return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s.append('5'                 ); return s == "12345"  ;}(), "String catenation should work");
+static_assert ([]{ShortString s{"1234"}; s.append(ShortString16{"567"}); return s == "1234567";}(), "String catenation between types should work");
 
 static_assert (ShortString{} + "12345678901" == "1234567",  "Strings should be cut to fit the internal buf");
 static_assert (ShortString{"12345678901"} == "1234567",     "Strings should be cut to fit the internal buf");
