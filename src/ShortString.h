@@ -123,6 +123,45 @@ public:
     constexpr inline BasicShortString &append(const _CharT c) noexcept{return operator+=(c);}
     template <int lenR>
     constexpr inline BasicShortString &append(const BasicShortString<lenR, _CharT, _Traits> &s) noexcept{return operator+=(s.c_str());}
+
+    constexpr BasicShortString &truncate(std::size_t pos) noexcept
+    {
+        if(pos > capacity() || pos > size())
+            return *this;
+
+        _Traits::assign(buf[pos], '\0');
+        _Traits::assign(buf[len - 1], capacity() - pos);
+        return *this;
+    }
+    constexpr BasicShortString &insert(std::size_t pos, const _CharT * s) noexcept{
+        if(pos > capacity() - 1)
+            return *this;
+
+        const auto insertLen = [=](const auto *s){ const auto *end = s; while(*(++end)){} return end - s; }(s);
+        const auto newLen = std::min(insertLen + length(), capacity());
+        if(auto posBehindInsertion = std::min(pos + insertLen, capacity()); posBehindInsertion >= capacity()){
+            truncate(pos);
+            append(s);
+        }else{
+            const auto precopyLen = capacity() - posBehindInsertion;
+            for(std::size_t p = precopyLen; p > 0; --p)
+                _Traits::assign(buf[posBehindInsertion + p - 1], buf[pos + p - 1]);
+            auto *p = buf + pos;
+            for(; *s; ++s, ++p)
+                _Traits::assign(*p, *s);
+
+            _Traits::assign(buf[newLen], '\0');
+            _Traits::assign(buf[len - 1], capacity() - newLen);
+        }
+
+        return *this;
+    };
+    template <int lenR>
+    constexpr inline BasicShortString &insert(std::size_t pos, const BasicShortString<lenR, _CharT, _Traits> &s) noexcept{return insert(pos, s.c_str());}
+    constexpr inline BasicShortString &insert(std::size_t pos, _CharT c) noexcept{
+        _CharT s[] = {c, '\0'};
+        return insert(pos, s);
+    }
 private:
     _CharT buf[len];
 };
@@ -420,14 +459,31 @@ static_assert (ShortString{"1234"} + ShortString16{"567"} == "1234567", "String 
 
 static_assert ([]{ShortString s{"1234"}; s+= ShortString{"567"}        ; return s == "1234567";}(), "String catenation should work");
 static_assert ([]{ShortString s{"1234"}; s+= "567"                     ; return s == "1234567";}(), "String catenation should work");
-static_assert ([]{ShortString s{}      ; s+= "1234567"                 ; return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{      }; s+= "1234567"                 ; return s == "1234567";}(), "String catenation should work");
 static_assert ([]{ShortString s{"1234"}; s+= '5'                       ; return s == "12345"  ;}(), "String catenation should work");
 static_assert ([]{ShortString s{"1234"}; s+= ShortString16{"567"}      ; return s == "1234567";}(), "String catenation between types should work");
+
 static_assert ([]{ShortString s{"1234"}; s.append(ShortString{"567"}  ); return s == "1234567";}(), "String catenation should work");
 static_assert ([]{ShortString s{"1234"}; s.append("567"               ); return s == "1234567";}(), "String catenation should work");
-static_assert ([]{ShortString s{}      ; s.append("1234567"           ); return s == "1234567";}(), "String catenation should work");
+static_assert ([]{ShortString s{      }; s.append("1234567"           ); return s == "1234567";}(), "String catenation should work");
 static_assert ([]{ShortString s{"1234"}; s.append('5'                 ); return s == "12345"  ;}(), "String catenation should work");
 static_assert ([]{ShortString s{"1234"}; s.append(ShortString16{"567"}); return s == "1234567";}(), "String catenation between types should work");
+
+static_assert ([]{ShortString s{"qwerty"}; s.insert(0,"1234567"             ); return s == "1234567";}(), "insert() should work");
+static_assert ([]{ShortString s{"qwerty"}; s.insert(0,"12345678"            ); return s == "1234567";}(), "insert() should work");
+static_assert ([]{ShortString s{"qwerty"}; s.insert(0,ShortString{"1234567"}); return s == "1234567";}(), "insert() should work");
+static_assert ([]{ShortString s{"567"   }; s.insert(0,ShortString{"1234"}   ); return s == "1234567";}(), "insert() should work");
+static_assert ([]{ShortString s{"5678"  }; s.insert(0,"1234"                ); return s == "1234567";}(), "insert() should work");
+static_assert ([]{ShortString s{        }; s.insert(0,"1234567"             ); return s == "1234567";}(), "insert() should work");
+static_assert ([]{ShortString s{"234"   }; s.insert(0,'1'                   ); return s == "1234"   ;}(), "insert() should work");
+static_assert ([]{ShortString s{"567"   }; s.insert(0,ShortString16{"1234"} ); return s == "1234567";}(), "insert() should work");
+static_assert ([]{ShortString s{"1"     }; s.insert(2,ShortString16{"45"}   ); return s == "1"      ;}(), "insert() should work");
+static_assert ([]{ShortString s{"134"   }; s.insert(1,ShortString16{"2"}    ); return s == "1234"   ;}(), "insert() should work");
+
+static_assert (ShortString{"1234567"}.truncate(0) == "",        "String comparizon should work");
+static_assert (ShortString{"1234567"}.truncate(1) == "1",       "String comparizon should work");
+static_assert (ShortString{"1234567"}.truncate(7) == "1234567", "String comparizon should work");
+static_assert (ShortString{"1234567"}.truncate(8) == "1234567", "String comparizon should work");
 
 static_assert (ShortString{} + "12345678901" == "1234567",  "Strings should be cut to fit the internal buf");
 static_assert (ShortString{"12345678901"} == "1234567",     "Strings should be cut to fit the internal buf");

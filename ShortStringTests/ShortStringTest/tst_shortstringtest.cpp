@@ -36,6 +36,7 @@ private slots:
     void providesApplyableConstIteratorTypes();
     void canBeCleared();
     void canBeStreamed();
+    void allowsInsertion();
 };
 
 ShortStringTest::ShortStringTest()
@@ -428,6 +429,35 @@ void ShortStringTest::canBeStreamed()
     QTextStream stream(&qs, QIODevice::WriteOnly);
     stream << s;
     QCOMPARE(QString(s.c_str()), qs);
+}
+
+void ShortStringTest::allowsInsertion()
+{
+    {
+        ShortString s;
+        s.insert(0, "1234567");
+        QCOMPARE(QString(s.c_str()), QString("1234567"));
+    }
+    {
+        ShortString s = "234567";
+        s.insert(0, "1");
+        QCOMPARE(QString(s.c_str()), QString("1234567"));
+    }
+    {
+        ShortString s = "234567";
+        s.insert(0, '1');
+        QCOMPARE(QString(s.c_str()), QString("1234567"));
+    }
+    {
+        ShortString s = "";
+        s.insert(0, "1234567");
+        QCOMPARE(QString(s.c_str()), QString("1234567"));
+    }
+    {
+        ShortString s = "134";
+        s.insert(1, '2');
+        QCOMPARE(QString(s.c_str()), QString("1234"));
+    }
 }
 
 QTEST_APPLESS_MAIN(ShortStringTest)
