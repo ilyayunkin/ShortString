@@ -1,4 +1,5 @@
 #include <QtTest>
+#include <QTextStream>
 #include "ShortString.h"
 #include <algorithm>
 // add necessary includes here
@@ -34,6 +35,7 @@ private slots:
     void providesApplyableIteratorTypes();
     void providesApplyableConstIteratorTypes();
     void canBeCleared();
+    void canBeStreamed();
 };
 
 ShortStringTest::ShortStringTest()
@@ -417,6 +419,15 @@ void ShortStringTest::canBeCleared()
     s.clear();
     QVERIFY(s.empty());
     QCOMPARE(QString(s.c_str()), QString());
+}
+
+void ShortStringTest::canBeStreamed()
+{
+    ShortString s = "7654321";
+    QString qs;
+    QTextStream stream(&qs, QIODevice::WriteOnly);
+    stream << s;
+    QCOMPARE(QString(s.c_str()), qs);
 }
 
 QTEST_APPLESS_MAIN(ShortStringTest)

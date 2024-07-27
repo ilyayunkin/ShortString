@@ -294,6 +294,14 @@ template <int len,
     return sscmp(sl, sr.c_str()) != -1;
 }
 
+template <typename StreamT,
+          int len,
+          typename _CharT = char,
+          typename _Traits = std::char_traits<_CharT>>
+constexpr inline StreamT& operator<<(StreamT &stream, const BasicShortString<len, _CharT, _Traits> &s) noexcept{
+    return stream << s.c_str();
+}
+
 typedef BasicShortString<8> ShortString;
 typedef BasicShortString<16> ShortString16;
 static_assert (std::is_trivially_copyable<ShortString>::value);
